@@ -3,15 +3,9 @@ using System.Collections.Generic;
 
 namespace ArteEva.Models
 {
-    public class Cart
+    public class Cart : BaseModel
     {
-        public int Id { get; set; }
-
         public int UserId { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public User User { get; set; }

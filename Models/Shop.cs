@@ -12,10 +12,8 @@ namespace ArteEva.Models
         Suspended
     }
 
-    public class Shop
+    public class Shop : BaseModel
     {
-        public int Id { get; set; }
-
         public int OwnerUserId { get; set; }
 
         [Required]
@@ -37,10 +35,6 @@ namespace ArteEva.Models
 
         [Timestamp]
         public byte[] RowVersion { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public User Owner { get; set; }

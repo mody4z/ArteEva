@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public class Category
+    public class Category : BaseModel
     {
-        public int Id { get; set; }
-
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
@@ -16,8 +14,6 @@ namespace ArteEva.Models
         public string Description { get; set; }
 
         public bool IsDeleted { get; set; }
-
-        public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
         public ICollection<SubCategory> SubCategories { get; set; }

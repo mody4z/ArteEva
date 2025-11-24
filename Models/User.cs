@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public class User
+    public class User : BaseModel
     {
-        public int Id { get; set; }
-
         [Required]
         [MaxLength(120)]
         public string Email { get; set; }
@@ -31,10 +29,6 @@ namespace ArteEva.Models
 
         [Timestamp]
         public byte[] RowVersion { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public ICollection<UserRole> UserRoles { get; set; }

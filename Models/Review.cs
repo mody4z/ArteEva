@@ -11,10 +11,8 @@ namespace ArteEva.Models
         Flagged
     }
 
-    public class Review
+    public class Review : BaseModel
     {
-        public int Id { get; set; }
-
         public int UserId { get; set; }
         public int ProductId { get; set; }
         public int OrderItemId { get; set; }
@@ -27,10 +25,6 @@ namespace ArteEva.Models
         public string Content { get; set; }
 
         public ReviewStatus Status { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public User User { get; set; }

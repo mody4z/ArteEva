@@ -1,9 +1,7 @@
 namespace ArteEva.Models
 {
-    public class CartItem
+    public class CartItem : BaseModel
     {
-        public int Id { get; set; }
-
         public int CartId { get; set; }
         public int ProductId { get; set; }
 

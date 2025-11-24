@@ -2,14 +2,10 @@ using System;
 
 namespace ArteEva.Models
 {
-    public class ShopFollower
+    public class ShopFollower : BaseModel
     {
-        public int Id { get; set; }
-
         public int ShopId { get; set; }
         public int UserId { get; set; }
-
-        public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
         public Shop Shop { get; set; }

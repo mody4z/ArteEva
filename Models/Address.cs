@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public class Address
+    public class Address : BaseModel
     {
-        public int Id { get; set; }
-
         public int? UserId { get; set; }
 
         [MaxLength(100)]

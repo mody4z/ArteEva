@@ -14,10 +14,8 @@ namespace ArteEva.Models
         Returned
     }
 
-    public class Shipment
+    public class Shipment : BaseModel
     {
-        public int Id { get; set; }
-
         public int OrderId { get; set; }
         public int ShippingAddressId { get; set; }
 
@@ -39,10 +37,6 @@ namespace ArteEva.Models
         public DateTime? PickedUpAt { get; set; }
 
         public DateTime? DeliveredAt { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public Order Order { get; set; }

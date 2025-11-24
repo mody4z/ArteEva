@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public class ProductImage
+    public class ProductImage : BaseModel
     {
-        public int Id { get; set; }
-
         public int ProductId { get; set; }
 
         [Required]

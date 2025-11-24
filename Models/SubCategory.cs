@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public class SubCategory
+    public class SubCategory : BaseModel
     {
-        public int Id { get; set; }
-
         public int CategoryId { get; set; }
 
         [Required]

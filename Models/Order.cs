@@ -15,10 +15,8 @@ namespace ArteEva.Models
         Refunded
     }
 
-    public class Order
+    public class Order : BaseModel
     {
-        public int Id { get; set; }
-
         public int UserId { get; set; }
         public int ShopId { get; set; }
         public int ShippingAddressId { get; set; }
@@ -44,10 +42,6 @@ namespace ArteEva.Models
 
         [Timestamp]
         public byte[] RowVersion { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public User User { get; set; }

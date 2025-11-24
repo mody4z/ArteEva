@@ -12,10 +12,8 @@ namespace ArteEva.Models
         Escalated
     }
 
-    public class Dispute
+    public class Dispute : BaseModel
     {
-        public int Id { get; set; }
-
         public int OrderId { get; set; }
         public int UserId { get; set; }
 
@@ -27,10 +25,6 @@ namespace ArteEva.Models
 
         [Required]
         public string Description { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public Order Order { get; set; }

@@ -12,10 +12,8 @@ namespace ArteEva.Models
         Completed
     }
 
-    public class Refund
+    public class Refund : BaseModel
     {
-        public int Id { get; set; }
-
         public int OrderId { get; set; }
         public int PaymentId { get; set; }
 
@@ -25,10 +23,6 @@ namespace ArteEva.Models
 
         [MaxLength(500)]
         public string Reason { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public Order Order { get; set; }

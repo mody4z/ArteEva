@@ -23,10 +23,8 @@ namespace ArteEva.Models
         Cancelled
     }
 
-    public class Payment
+    public class Payment : BaseModel
     {
-        public int Id { get; set; }
-
         public int OrderId { get; set; }
         public int UserId { get; set; }
 
@@ -38,10 +36,6 @@ namespace ArteEva.Models
 
         [MaxLength(200)]
         public string ProviderRef { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public Order Order { get; set; }
