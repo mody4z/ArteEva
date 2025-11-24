@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArteEva.Models
 {
-    public class Role : BaseModel
+    public class Role : IdentityRole<int>
     {
-        [Required]
-        [MaxLength(80)]
-        public string Name { get; set; }
-
         [MaxLength(200)]
         public string Description { get; set; }
+
+        public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
         public ICollection<UserRole> UserRoles { get; set; }
