@@ -1,0 +1,6 @@
+@ArtEva_HostAddress = http://localhost:5142
+
+GET {{ArtEva_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

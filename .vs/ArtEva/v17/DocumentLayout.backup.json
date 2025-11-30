@@ -1,0 +1,177 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\ArtEva\\ArtEva\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\models\\dtos\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\models\\dtos\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\models\\viewmodels\\registrationviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\models\\viewmodels\\registrationviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\models\\dtos\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\models\\dtos\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|e:\\arteva\\arteva\\arteva\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{12E0741F-8561-4E84-B620-0A704482B2C4}|ArtEva\\ArtEva.csproj|solutionrelative:arteva\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\appsettings.json",
+              "RelativeDocumentMoniker": "ArtEva\\appsettings.json",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\appsettings.json",
+              "RelativeToolTip": "ArtEva\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-30T00:13:38.85Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "User.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\User.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Models\\User.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\User.cs",
+              "RelativeToolTip": "ArtEva\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:33:53.847Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "RegisterRequestDTO.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\DTOs\\RegisterRequestDTO.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Models\\DTOs\\RegisterRequestDTO.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\DTOs\\RegisterRequestDTO.cs",
+              "RelativeToolTip": "ArtEva\\Models\\DTOs\\RegisterRequestDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:29:40.017Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RegistrationViewModel.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\ViewModels\\RegistrationViewModel.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Models\\ViewModels\\RegistrationViewModel.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\ViewModels\\RegistrationViewModel.cs",
+              "RelativeToolTip": "ArtEva\\Models\\ViewModels\\RegistrationViewModel.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABEAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:30:48.813Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "LoginRequestDTO.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\DTOs\\LoginRequestDTO.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Models\\DTOs\\LoginRequestDTO.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\DTOs\\LoginRequestDTO.cs",
+              "RelativeToolTip": "ArtEva\\Models\\DTOs\\LoginRequestDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:29:27.777Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Controllers\\AccountController.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "ArtEva\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAA1wCAAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:25:46.016Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "ArtEva\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAADABAAAAAAAAAAAIwAcAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T23:21:40.356Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Program.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Program.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Program.cs",
+              "RelativeToolTip": "ArtEva\\Program.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAgwBoAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T21:48:22.085Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UserRole.cs",
+              "DocumentMoniker": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\UserRole.cs",
+              "RelativeDocumentMoniker": "ArtEva\\Models\\UserRole.cs",
+              "ToolTip": "E:\\ArtEva\\ArtEva\\ArtEva\\Models\\UserRole.cs",
+              "RelativeToolTip": "ArtEva\\Models\\UserRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T19:49:08.484Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

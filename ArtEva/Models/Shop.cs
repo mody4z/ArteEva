@@ -1,0 +1,42 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace ArteEva.Models
+{
+    public enum ShopStatus
+    {
+        Active,
+        Inactive,
+        Pending,
+        Suspended,
+        Rejected
+    }
+
+    public class Shop : BaseModel
+    {
+        public int OwnerUserId { get; set; }
+
+        [Required]
+        [MaxLength(120)]
+        public string Name { get; set; }
+
+        public string ImageUrl { get; set; }
+
+        [MaxLength(500)]
+        public string Description { get; set; }
+
+        public ShopStatus Status { get; set; } = ShopStatus.Pending;
+
+        public decimal RatingAverage { get; set; } = 0;
+
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
+
+        // Navigation Properties
+        public User Owner { get; set; }
+        public ICollection<Product> Products { get; set; }
+        public ICollection<Order> Orders { get; set; }
+        public ICollection<ShopFollower> ShopFollowers { get; set; }
+    }
+}
