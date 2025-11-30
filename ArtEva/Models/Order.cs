@@ -25,8 +25,8 @@ namespace ArteEva.Models
         [MaxLength(40)]
         public string OrderNumber { get; set; }
 
-        [MaxLength(50)]
-        public string BuyerCodename { get; set; }
+        //[MaxLength(50)]
+        //public string BuyerCodename { get; set; }
 
         public OrderStatus Status { get; set; }
 

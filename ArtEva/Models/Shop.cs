@@ -38,5 +38,7 @@ namespace ArteEva.Models
         public ICollection<Product> Products { get; set; }
         public ICollection<Order> Orders { get; set; }
         public ICollection<ShopFollower> ShopFollowers { get; set; }
+        public ICollection<Review> Reviews { get; set; }
+
     }
 }

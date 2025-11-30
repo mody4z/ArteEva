@@ -11,8 +11,6 @@ namespace ArteEva.Models
         [MaxLength(100)]
         public string Name { get; set; }
 
-        public bool IsDeleted { get; set; }
-
         // Navigation Properties
         public Category Category { get; set; }
         public ICollection<Product> Products { get; set; }

@@ -30,6 +30,9 @@ namespace ArteEva.Models
         public ICollection<Address> Addresses { get; set; }
         public ICollection<Dispute> Disputes { get; set; }
         public ICollection<ShopFollower> ShopFollowers { get; set; }
+        public ICollection<Review> WrittenReviews { get; set; }  // reviews written by the user
+        public ICollection<Review> ReceivedReviews { get; set; } // reviews about a buyer
+
         public Cart Cart { get; set; }
 
         #endregion

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArtEva")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07320025c69465ce267a25513589ef15f50ec8ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArtEva")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ArtEva")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

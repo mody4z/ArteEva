@@ -4,14 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum ProductCondition
-    {
-        New,
-        LikeNew,
-        Good,
-        Fair,
-        Used
-    }
 
     public class Product : BaseModel
     {
@@ -29,16 +21,10 @@ namespace ArteEva.Models
 
         public decimal Price { get; set; }
 
-        public int Stock { get; set; }
-
-        public ProductCondition Condition { get; set; }
-
-        public bool IsPublished { get; set; }
-
-        public bool IsDeleted { get; set; }
+        public bool IsPublished { get; set; } = false;
 
         [Timestamp]
-        public byte[] RowVersion { get; set; }
+        public byte[]? RowVersion { get; set; }
 
         // Navigation Properties
         public Shop Shop { get; set; }

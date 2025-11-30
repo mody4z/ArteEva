@@ -244,23 +244,41 @@ namespace ArteEva.Data
             // Review configurations
             modelBuilder.Entity<Review>(entity =>
             {
-                entity.HasOne(r => r.User)
-                    .WithMany(u => u.Reviews)
-                    .HasForeignKey(r => r.UserId)
+                // Reviewer (who wrote the review)
+                entity.HasOne(r => r.Reviewer)
+                    .WithMany(u => u.WrittenReviews)
+                    .HasForeignKey(r => r.ReviewerUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
+                // Product review (TargetType = Product)
                 entity.HasOne(r => r.Product)
                     .WithMany(p => p.Reviews)
-                    .HasForeignKey(r => r.ProductId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .HasForeignKey(r => r.TargetId)
+                    .HasPrincipalKey(p => p.Id)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
-                entity.HasOne(r => r.OrderItem)
-                    .WithMany(oi => oi.Reviews)
-                    .HasForeignKey(r => r.OrderItemId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                // Shop review (TargetType = Shop)
+                entity.HasOne(r => r.Shop)
+                    .WithMany(s => s.Reviews)
+                    .HasForeignKey(r => r.TargetId)
+                    .HasPrincipalKey(s => s.Id)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
-                entity.HasIndex(r => new { r.UserId, r.ProductId }).IsUnique();
+                // Buyer review (seller reviewing a customer)
+                entity.HasOne(r => r.ReviewedBuyer)
+                    .WithMany(u => u.ReceivedReviews)
+                    .HasForeignKey(r => r.TargetId)
+                    .HasPrincipalKey(u => u.Id)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+
+                // Optional: prevent duplicate reviews of the same target by the same reviewer
+                entity.HasIndex(r => new { r.ReviewerUserId, r.TargetType, r.TargetId })
+                      .IsUnique();
             });
+
 
             // Favorite configurations
             modelBuilder.Entity<Favorite>(entity =>

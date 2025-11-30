@@ -150,3 +150,4 @@ E:\ArtEva\ArtEva\ArtEva\obj\Debug\net8.0\refint\ArtEva.dll
 E:\ArtEva\ArtEva\ArtEva\obj\Debug\net8.0\ArtEva.pdb
 E:\ArtEva\ArtEva\ArtEva\obj\Debug\net8.0\ArtEva.genruntimeconfig.cache
 E:\ArtEva\ArtEva\ArtEva\obj\Debug\net8.0\ref\ArtEva.dll
+E:\ArtEva\ArtEva\ArtEva\obj\Debug\net8.0\ArtEva.sourcelink.json
