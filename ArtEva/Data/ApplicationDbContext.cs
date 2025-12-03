@@ -1,10 +1,9 @@
 using ArteEva.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
+ using Microsoft.EntityFrameworkCore;
+ using System.Data;
+using System.Diagnostics;
 namespace ArteEva.Data
 {
     public class ApplicationDbContext : IdentityDbContext<
@@ -42,6 +41,12 @@ namespace ArteEva.Data
         public DbSet<Dispute> Disputes { get; set; }
         public DbSet<ShopFollower> ShopFollowers { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+          optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                .LogTo(log => Debug.WriteLine(log), LogLevel.Information)
+                .EnableSensitiveDataLogging(true);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -336,6 +341,37 @@ namespace ArteEva.Data
 
                 entity.HasIndex(sf => new { sf.ShopId, sf.UserId }).IsUnique();
             });
+
+            // Seed Roles Data
+            modelBuilder.Entity<Role>().HasData(
+                new Role
+                {
+                    Id = 1,
+                    Name = "Admin",
+                    NormalizedName = "ADMIN",
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    Description = "Administrator with full system access",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Role
+                {
+                    Id = 2,
+                    Name = "Buyer",
+                    NormalizedName = "BUYER",
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    Description = "Customer who can browse and purchase artworks",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Role
+                {
+                    Id = 3,
+                    Name = "Seller",
+                    NormalizedName = "SELLER",
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    Description = "Artist who can create shop and sell artworks",
+                    CreatedAt = DateTime.UtcNow
+                }
+            );
         }
     }
 }

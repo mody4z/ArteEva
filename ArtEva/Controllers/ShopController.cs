@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace ArtEva.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class ShopController : ControllerBase
     {
@@ -18,7 +18,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Seller,Admin")]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopDto dto)
         {
             try
@@ -44,7 +44,7 @@ namespace ArtEva.Controllers
             }
         }
 
-        [HttpGet("my-shop")]
+        [HttpGet()]
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetMyShop()
         {

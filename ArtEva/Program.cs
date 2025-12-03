@@ -76,6 +76,7 @@ namespace ArtEva
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IShopService, ShopService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
             // Register repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
