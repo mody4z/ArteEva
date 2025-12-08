@@ -1,18 +1,10 @@
+using ArtEva.Models.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum ShipmentStatus
-    {
-        Pending,
-        PickedUp,
-        InTransit,
-        OutForDelivery,
-        Delivered,
-        Failed,
-        Returned
-    }
+ 
 
     public class Shipment : BaseModel
     {

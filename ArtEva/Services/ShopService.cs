@@ -3,6 +3,7 @@ using ArteEva.Models;
 using ArtEva.DTOs.Shop;
 using ArteEva.Repositories;
 using Microsoft.EntityFrameworkCore;
+using ArtEva.Models.Enums;
 
 namespace ArtEva.Services
 {

@@ -1,28 +1,10 @@
+using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum PaymentMethod
-    {
-        CreditCard,
-        DebitCard,
-        PayPal,
-        BankTransfer,
-        CashOnDelivery
-    }
-
-    public enum PaymentStatus
-    {
-        Pending,
-        Processing,
-        Completed,
-        Failed,
-        Refunded,
-        Cancelled
-    }
-
     public class Payment : BaseModel
     {
         public int OrderId { get; set; }

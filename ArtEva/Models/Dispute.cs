@@ -1,16 +1,10 @@
+using ArtEva.Models.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum DisputeStatus
-    {
-        Open,
-        UnderReview,
-        Resolved,
-        Closed,
-        Escalated
-    }
+   
 
     public class Dispute : BaseModel
     {

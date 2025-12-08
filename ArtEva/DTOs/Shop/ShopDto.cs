@@ -1,4 +1,5 @@
 using ArteEva.Models;
+using ArtEva.Models.Enums;
 
 namespace ArtEva.DTOs.Shop
 {

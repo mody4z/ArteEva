@@ -1,17 +1,11 @@
+using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum ShopStatus
-    {
-        Active,
-        Inactive,
-        Pending,
-        Suspended,
-        Rejected
-    }
+   
 
     public class Shop : BaseModel
     {

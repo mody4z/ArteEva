@@ -1,23 +1,10 @@
+using ArtEva.Models.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum ReviewStatus
-    {
-        Pending,
-        Approved,
-        Rejected,
-        Flagged
-    }
-    public enum ReviewTargetType
-    {
-        Product = 1,
-        Shop = 2,
-        Buyer = 3
-    }
-
-
+   
     public class Review : BaseModel
     {
         // The user who wrote the review (buyer or seller)

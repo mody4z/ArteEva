@@ -1,18 +1,11 @@
+using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum NotificationType
-    {
-        OrderUpdate,
-        ProductUpdate,
-        ShopUpdate,
-        System,
-        Promotion,
-        Review
-    }
+    
 
     public class Notification : BaseModel
     {

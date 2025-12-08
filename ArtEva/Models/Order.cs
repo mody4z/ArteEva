@@ -1,19 +1,11 @@
+using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum OrderStatus
-    {
-        Pending,
-        Processing,
-        Confirmed,
-        Shipped,
-        Delivered,
-        Cancelled,
-        Refunded
-    }
+ 
 
     public class Order : BaseModel
     {

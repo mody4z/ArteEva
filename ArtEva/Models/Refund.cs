@@ -1,16 +1,10 @@
+using ArtEva.Models.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
-    public enum RefundStatus
-    {
-        Requested,
-        Processing,
-        Approved,
-        Rejected,
-        Completed
-    }
+  
 
     public class Refund : BaseModel
     {
