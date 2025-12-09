@@ -29,7 +29,7 @@ namespace ArtEva.Services
                 throw new Exception("User already has a shop");
             }
 
-            var shop = new ArteEva.Models.Shop
+            var shop = new Shop
             {
                 OwnerUserId = userId,
                 Name = dto.Name,

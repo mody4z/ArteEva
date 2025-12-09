@@ -107,10 +107,11 @@ namespace ArtEva
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IShopService, ShopService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             // Register repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IShopRepository, ShopRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();

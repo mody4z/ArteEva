@@ -9,7 +9,10 @@ namespace ArteEva.Repositories
 {
     public interface IRepository<T> where T : class
     {
+        public  Task Delete(int id);
         Task<T> GetByIdAsync(int id);
+        Task<T> GetByIDWithTracking(int id);
+
         Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);

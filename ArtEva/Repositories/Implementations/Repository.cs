@@ -5,10 +5,11 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ArteEva.Data;
+using ArteEva.Models;
 
 namespace ArteEva.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : BaseModel
     {
         protected readonly ApplicationDbContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -19,14 +20,20 @@ namespace ArteEva.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIDWithTracking(int id)
         {
-            return await _dbSet.FindAsync(id);
+            var res= await _dbSet.AsTracking().FirstOrDefaultAsync(s=>s.Id==id && !s.IsDeleted);
+            return res;
+        }
+        public async Task<T?> GetByIdAsync(int id)
+        {
+            var res = await _dbSet.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+            return res;
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.Where(s=> !s.IsDeleted).ToListAsync();
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
@@ -76,6 +83,14 @@ namespace ArteEva.Repositories
         {
             _dbSet.Remove(entity);
         }
+        public async Task Delete(int id)
+        {
+            var res = await GetByIDWithTracking(id);
+            if(res!= null)
+            res.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
+        }
 
         public void RemoveRange(IEnumerable<T> entities)
         {
@@ -98,5 +113,6 @@ namespace ArteEva.Repositories
                 .Take(pageSize)
                 .ToListAsync();
         }
+
     }
 }
