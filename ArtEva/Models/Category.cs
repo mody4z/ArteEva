@@ -14,8 +14,7 @@ namespace ArteEva.Models
         public string Description { get; set; }
         public string? ImageUrl { get; set; }
 
-        public bool IsDeleted { get; set; }
-
+ 
         // Navigation Properties
         public ICollection<SubCategory> SubCategories { get; set; }
         public ICollection<Product> Products { get; set; }

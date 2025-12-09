@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ArtEva.Services
 {
+    
     public class AdminService : IAdminService
     {
         private readonly UserManager<User> _userManager;
