@@ -1,5 +1,5 @@
 using ArtEva.DTOs.Shop;
-using ArtEva.Services;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

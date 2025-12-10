@@ -1,8 +1,8 @@
 using ArtEva.DTOs.Admin;
-using ArtEva.Services;
 using ArtEva.DTOs.Shop;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ArtEva.Services.Interfaces;
 
 namespace ArtEva.Controllers
 {

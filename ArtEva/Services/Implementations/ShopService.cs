@@ -4,8 +4,9 @@ using ArtEva.DTOs.Shop;
 using ArteEva.Repositories;
 using Microsoft.EntityFrameworkCore;
 using ArtEva.Models.Enums;
+using ArtEva.Services.Interfaces;
 
-namespace ArtEva.Services
+namespace ArtEva.Services.Implementations
 {
     public class ShopService : IShopService
     {
@@ -128,12 +129,12 @@ namespace ArtEva.Services
             return MapToDto(shop);
         }
 
-        private ShopDto MapToDto(ArteEva.Models.Shop shop)
+        private ShopDto MapToDto(Shop shop)
         {
             return new ShopDto
             {
                 //Id = shop.Id,
-                OwnerUserId = shop.OwnerUserId,
+                OwnerUserName = shop.Owner.UserName,
                 Name = shop.Name,
                 ImageUrl = shop.ImageUrl,
                 Description = shop.Description,

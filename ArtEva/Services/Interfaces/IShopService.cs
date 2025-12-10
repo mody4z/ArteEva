@@ -1,7 +1,7 @@
 using ArtEva.DTOs.Shop;
 using System.Threading.Tasks;
 
-namespace ArtEva.Services
+namespace ArtEva.Services.Interfaces
 {
     public interface IShopService
     {

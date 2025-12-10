@@ -1,9 +1,9 @@
 using ArteEva.Data;
 using ArteEva.Models;
 using ArteEva.Repositories;
-using ArteEva.Services;
 using ArtEva.Data.Data_Seeder;
-using ArtEva.Services;
+using ArtEva.Services.Implementations;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

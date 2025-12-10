@@ -1,5 +1,5 @@
 ﻿using ArtEva.DTOs;
-using ArtEva.Services;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
