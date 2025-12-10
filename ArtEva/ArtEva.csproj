@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\uploads\shops\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
