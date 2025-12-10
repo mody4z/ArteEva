@@ -19,24 +19,40 @@ namespace ArtEva.Controllers.Filters.Middlewares
             }
             catch (NotFoundException ex)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
-                await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+                await WriteError(context, StatusCodes.Status404NotFound, ex.Message);
             }
             catch (ForbiddenException ex)
             {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+                await WriteError(context, StatusCodes.Status403Forbidden, ex.Message);
             }
             catch (ValidationException ex)
             {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+                await WriteError(context, StatusCodes.Status400BadRequest, ex.Message);
             }
             catch (Exception ex)
             {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsJsonAsync(new { error = "Unexpected error occurred." });
+                await WriteError(context, StatusCodes.Status500InternalServerError,
+                    "Unexpected error occurred.");
+            }
+        }
+
+        private async Task WriteError(HttpContext context, int statusCode, string message)
+        {
+            if (!context.Response.HasStarted)
+            {
+                context.Response.Clear();
+                context.Response.StatusCode = statusCode;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsJsonAsync(new { error = message });
+            }
+            else
+            {
+                // If headers already sent, you MUST not modify response
+                // You can only log this case.
+                Console.WriteLine("Warning: Cannot write error response because headers already sent.");
             }
         }
     }
+
 }

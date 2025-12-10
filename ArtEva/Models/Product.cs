@@ -1,3 +1,4 @@
+using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,6 +22,8 @@ namespace ArteEva.Models
 
 
         public decimal Price { get; set; }
+
+        public ProductStatus Status { get; set; } = ProductStatus.InActive;
 
         public bool IsPublished { get; set; } = false;
 

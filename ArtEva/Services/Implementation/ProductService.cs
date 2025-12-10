@@ -2,6 +2,7 @@
 using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.DTOs.Product;
+using ArtEva.DTOs.ProductImage;
 using ArtEva.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,27 +12,77 @@ namespace ArtEva.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IProductImageRepository _productImageRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ISubCategoryRepository _subCategoryRepository;
         private readonly IShopService _shopService;
-        private readonly ApplicationDbContext _context;
 
         public ProductService(
             IProductRepository productRepository,
             IProductImageRepository productImageRepository,
-            IShopService shopService,
-            ApplicationDbContext context)
+            ICategoryRepository categoryRepository,
+            ISubCategoryRepository subCategoryRepository,
+            IShopService shopService)
         {
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
+            _categoryRepository = categoryRepository;
+            _subCategoryRepository = subCategoryRepository;
             _shopService = shopService;
-            _context = context;
+        
         }
 
-        public async Task<ProductDto> CreateProductAsync(
-        int userId, CreateProductDto dto)
+        public async Task<CreatedProductDto> CreateProductAsync(int userId, CreateProductDto dto)
         {
-            // -------------------------------------------------------------
-            // 1. Verify shop exists AND belongs to this user
-            // -------------------------------------------------------------
+            // Validate input & business rules
+            await ValidateProductCreationAsync(userId, dto);
+
+            // Generate a unique SKU
+            string sku = await GenerateUniqueSkuAsync(dto.ShopId, dto.CategoryId);
+
+            // Build product entity
+            var product = new Product
+            {
+                ShopId = dto.ShopId,
+                CategoryId = dto.CategoryId,
+                SubCategoryId = dto.SubCategoryId,
+                Title = dto.Title,
+                SKU = sku,
+                Price = dto.Price,
+                IsPublished = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _productRepository.AddAsync(product);
+            await _productRepository.SaveChanges();
+
+            // Save product images
+            if (dto.Images != null && dto.Images.Any())
+            {
+                var images = dto.Images.Select(i => new ProductImage
+                {
+                    ProductId = product.Id,
+                    Url = i.Url,
+                    AltText = i.AltText,
+                    SortOrder = i.SortOrder,
+                    IsPrimary = i.IsPrimary,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await _productImageRepository.AddRangeAsync(images);
+                await _productImageRepository.SaveChanges();
+            }
+
+            // Load complete product with images
+            var loadedProduct = await _productRepository.GetProductWithImagesAsync(product.Id);
+
+            return MapToProductDto(loadedProduct);
+        }
+
+
+        #region Private methods
+        private async Task ValidateProductCreationAsync(int userId, CreateProductDto dto)
+        {
+            // 1. Validate shop
             var shop = await _shopService.GetShopByIdAsync(dto.ShopId);
 
             if (shop == null)
@@ -41,89 +92,77 @@ namespace ArtEva.Services
                 throw new Exception("You are not the owner of this shop.");
 
             if (shop.Status != ShopStatus.Active)
-                throw new Exception("Adding products is not allowed for inactive shops");
+                throw new Exception("Adding products is not allowed unless the shop is active.");
 
-            // -------------------------------------------------------------
-            // 2. Validate Category
-            // -------------------------------------------------------------
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.Id == dto.CategoryId && !c.IsDeleted);
+            // 2. Validate category exists
+            var categoryExists = await _categoryRepository.AnyAsync(c =>
+                c.Id == dto.CategoryId && !c.IsDeleted);
+
             if (!categoryExists)
                 throw new Exception("Invalid category.");
 
-            // -------------------------------------------------------------
-            // 3. Validate SubCategory belongs to Category
-            // -------------------------------------------------------------
-            var subCategory = await _context.SubCategories
-                .FirstOrDefaultAsync(sc =>
-                    sc.Id == dto.SubCategoryId &&
-                    sc.CategoryId == dto.CategoryId &&
-                    !sc.IsDeleted);
+            // 3. Validate subcategory ownership
+            var subCategory = await _subCategoryRepository.FirstOrDefaultAsync(sc =>
+                sc.Id == dto.SubCategoryId &&
+                sc.CategoryId == dto.CategoryId &&
+                !sc.IsDeleted);
 
             if (subCategory == null)
-                throw new Exception("Invalid subcategory or does not belong to category.");
+                throw new Exception("Invalid subcategory or does not belong to the selected category.");
+        }
+    
 
-            // -------------------------------------------------------------
-            // 4. Validate SKU uniqueness inside this shop
-            // -------------------------------------------------------------
-            var skuExists = await _context.Products
-                .AnyAsync(p =>
-                    p.SKU == dto.SKU &&
-                    p.ShopId == dto.ShopId &&
-                    !p.IsDeleted);
-
-            if (skuExists)
-                throw new Exception("SKU already exists in this shop.");
-
-            // -------------------------------------------------------------
-            // 5. Create Product (Always IsPublished = false)
-            // -------------------------------------------------------------
-            var product = new Product
-            {
-                ShopId = dto.ShopId,
-                CategoryId = dto.CategoryId,
-                SubCategoryId = dto.SubCategoryId,
-                Title = dto.Title,
-                SKU = dto.SKU,
-                Price = dto.Price,
-                IsPublished = false,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _productRepository.AddAsync(product);
-            await _context.SaveChangesAsync();  // Product gets its ID here
-
-            // -------------------------------------------------------------
-            // 6. Add Images
-            // -------------------------------------------------------------
-            if (dto.Images != null && dto.Images.Any())
-            {
-                var images = dto.Images.Select(img => new ProductImage
-                {
-                    ProductId = product.Id,
-                    Url = img.Url,
-                    AltText = img.AltText,
-                    SortOrder = img.SortOrder,
-                    IsPrimary = img.IsPrimary,
-                    CreatedAt = DateTime.UtcNow
-                });
-
-                await _productImageRepository.AddRangeAsync(images);
-                await _context.SaveChangesAsync();
-            }
-
-            // -------------------------------------------------------------
-            // 7. Return DTO
-            // -------------------------------------------------------------
-            return new ProductDto
+        private CreatedProductDto MapToProductDto(Product product)
+        {
+            return new CreatedProductDto
             {
                 Id = product.Id,
                 ShopId = product.ShopId,
+                CategoryId = product.CategoryId,
+                SubCategoryId = product.SubCategoryId,
                 Title = product.Title,
+                SKU = product.SKU,
                 Price = product.Price,
-                IsPublished = product.IsPublished
+                IsPublished = product.IsPublished,
+
+                Images = product.ProductImages?
+                    .OrderBy(i => i.SortOrder)
+                    .Select(i => new CreatedProductImageDto
+                    {
+                        Id = i.Id,
+                        Url = i.Url,
+                        AltText = i.AltText,
+                        SortOrder = i.SortOrder,
+                        IsPrimary = i.IsPrimary
+                    })
+                    .ToList()
             };
         }
 
+        private string GenerateSku(int shopId, int categoryId)
+        {
+            // Example: SHP5-CAT12-AX93DK
+            string random = Guid.NewGuid().ToString("N")[..6].ToUpper();
+            return $"SHP{shopId}-CAT{categoryId}-{random}";
+        }
+        private async Task<string> GenerateUniqueSkuAsync(int shopId, int categoryId)
+        {
+            string sku;
+
+            do
+            {
+                sku = GenerateSku(shopId, categoryId);
+
+            } while (await _productRepository.AnyAsync(p =>
+                p.SKU == sku &&
+                p.ShopId == shopId &&
+                !p.IsDeleted
+            ));
+
+            return sku;
+        }
+        #endregion
+
     }
 }
+

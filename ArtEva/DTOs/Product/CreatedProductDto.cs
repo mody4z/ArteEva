@@ -13,6 +13,6 @@ namespace ArtEva.DTOs.Product
         public decimal Price { get; set; }
         public bool IsPublished { get; set; }
 
-        public IList<CreateProductImageDto> Images { get; set; }
+        public IList<CreatedProductImageDto> Images { get; set; }
     }
 }

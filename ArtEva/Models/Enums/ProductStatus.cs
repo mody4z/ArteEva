@@ -1,6 +1,11 @@
-﻿namespace ArtEva.Models.Enums
+﻿using System.ComponentModel.Design;
+
+namespace ArtEva.Models.Enums
 {
-    public class ProductStatus
+    public enum ProductStatus
     {
+        Active,
+        InActive
+
     }
 }
