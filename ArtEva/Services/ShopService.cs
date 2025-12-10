@@ -132,13 +132,13 @@ namespace ArtEva.Services
         {
             return new ShopDto
             {
-                Id = shop.Id,
+                //Id = shop.Id,
                 OwnerUserId = shop.OwnerUserId,
                 Name = shop.Name,
                 ImageUrl = shop.ImageUrl,
                 Description = shop.Description,
                 Status = shop.Status,
-                RejectionMessage = shop.RejectionMessage,
+                //RejectionMessage = shop.RejectionMessage,
                 RatingAverage = shop.RatingAverage
             };
         }

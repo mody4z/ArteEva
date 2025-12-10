@@ -108,6 +108,8 @@ namespace ArtEva
             builder.Services.AddScoped<IShopService, ShopService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IFileService, FileService>();
+
 
             // Register repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -217,6 +219,7 @@ namespace ArtEva
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseStaticFiles();   
             // Map attribute-routed controllers
             app.MapControllers();
 
