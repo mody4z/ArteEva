@@ -45,7 +45,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
         public async Task<IActionResult> GetMyShop()
         {
             try

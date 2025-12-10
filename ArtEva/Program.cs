@@ -4,6 +4,7 @@ using ArteEva.Repositories;
 using ArteEva.Services;
 using ArtEva.Data.Data_Seeder;
 using ArtEva.Services;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -133,7 +134,7 @@ namespace ArtEva
             builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
             builder.Services.AddScoped<IDisputeRepository, DisputeRepository>();
             builder.Services.AddScoped<IShopFollowerRepository, ShopFollowerRepository>();
-
+            builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
