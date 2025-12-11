@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArtEva.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
         private readonly IProductImageRepository _productImageRepository;
