@@ -139,7 +139,15 @@ namespace ArtEva.Services
 
             return MapToDto(shop);
         }
-
+        public async Task<bool> ShopExistAsync(int shopId)
+        {
+            var shop = _shopRepository.GetByIdAsync;
+            if (shop == null)
+                return false;
+            else
+                return true;
+        }
+        #region mapping
         private ShopDto MapToDto(ArteEva.Models.Shop shop)
         {
             return new ShopDto
@@ -154,5 +162,6 @@ namespace ArtEva.Services
                 RatingAverage = shop.RatingAverage
             };
         }
+        #endregion
     }
 }
