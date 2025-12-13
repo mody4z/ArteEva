@@ -149,8 +149,9 @@ namespace ArtEva.Services
             else
                 return true;
         }
-        public async Task UpdateShopAsync(int UserID, UpdateShopDto updateShopDto)
-        {
+ 
+        public async Task UpdateShopAsync(int UserID, UpdateShopDto updateShopDto) { 
+
              
             var shop = await _shopRepository.GetByIDWithTrackingAsync(updateShopDto.ShopId);
             if (shop == null)

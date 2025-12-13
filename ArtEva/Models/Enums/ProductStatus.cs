@@ -5,7 +5,6 @@ namespace ArtEva.Models.Enums
     public enum ProductStatus
     {
         Active,
-        InActive
-
+        InActive,
     }
 }

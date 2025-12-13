@@ -22,8 +22,10 @@ namespace ArteEva.Models
         public decimal Price { get; set; }
 
         public ProductStatus Status { get; set; } = ProductStatus.InActive;
+        public ProductApprovalStatus ApprovalStatus { get; set; } = ProductApprovalStatus.Pending;
 
         public bool IsPublished { get; set; } = false;
+        public string? RejectionMessage { get; set; }
 
         [Timestamp]
         public byte[]? RowVersion { get; set; }
