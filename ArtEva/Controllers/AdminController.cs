@@ -1,6 +1,8 @@
 using ArtEva.DTOs.Admin;
-using ArtEva.Services;
+using ArtEva.DTOs.Product;
 using ArtEva.DTOs.Shop;
+using ArtEva.Services;
+using ArtEva.ViewModels.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,6 +66,22 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> GetApproved([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var result = await _productService.GetAdminApprovedProductsAsync(page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpPost("{productId:int}/approve")]
+        public async Task<IActionResult> ApproveProduct(int productId)
+        {
+            var result = await _productService.ApproveProductAsync(productId);
+            return Ok(result);
+        }
+        [HttpPost("{productId:int}/reject")]
+        public async Task<IActionResult> RejectProduct(
+        [FromBody] RejectRequestViewModel req)
+        {
+            ProductToReject dto = 
+                new ProductToReject { ProductId = req.ProductId, RejectionMessage= req.RejectionMessage};
+            var result = await _productService.RejectProductAsync(dto);
             return Ok(result);
         }
     }

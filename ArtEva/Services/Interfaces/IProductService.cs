@@ -24,5 +24,9 @@ namespace ArtEva.Services
 
         Task<PagedResult<ProductListItemDto>> GetShopActiveProductsAsync(int shopId, int pageNumber, int pageSize);
         Task<PagedResult<ProductListItemDto>> GetShopInactiveProductsAsync(int shopId, int pageNumber, int pageSize);
+        Task<PagedResult<ProductListItemDto>> GetAllActiveProductsAsync(int pageNumber, int pageSize);
+        Task<ApprovedProductDto> ApproveProductAsync(int productId);
+        Task<RejectedProductDto> RejectProductAsync(ProductToReject dto);
+
     }
 }

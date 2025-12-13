@@ -157,7 +157,7 @@ namespace ArtEva.Services
         // admin wrapper: approved (IsPublished == true)
         public Task<PagedResult<ProductListItemDto>> GetAdminApprovedProductsAsync(int pageNumber, int pageSize)
         {
-            Expression<Func<Product, bool>> filter = p => p.IsPublished == true;
+            Expression<Func<Product, bool>> filter = p => p.IsPublished == true && p.ApprovalStatus== ProductApprovalStatus.Approved;
             return GetPagedProductsAsync(filter, pageNumber, pageSize);
         }
 
@@ -174,7 +174,13 @@ namespace ArtEva.Services
             Expression<Func<Product, bool>> filter = p => p.ShopId == shopId && p.Status == ProductStatus.InActive;
             return GetPagedProductsAsync(filter, pageNumber, pageSize);
         }
-
+        
+        // Buyer Get all Products
+        public Task<PagedResult<ProductListItemDto>> GetAllActiveProductsAsync( int pageNumber, int pageSize)
+        {
+            Expression<Func<Product, bool>> filter = p => p.ApprovalStatus == ProductApprovalStatus.Approved && p.Status == ProductStatus.Active;
+            return GetPagedProductsAsync(filter, pageNumber, pageSize);
+        }
         #endregion
 
         // UPDATE PRODUCT
@@ -194,6 +200,8 @@ namespace ArtEva.Services
             product.CategoryId = dto.CategoryId;
             product.SubCategoryId = dto.SubCategoryId;
             product.UpdatedAt = DateTime.UtcNow;
+            product.Status = ProductStatus.InActive;
+            product.ApprovalStatus = ProductApprovalStatus.Pending;
 
              _productRepository.Update(product);
             await _productRepository.SaveChanges();
@@ -208,7 +216,55 @@ namespace ArtEva.Services
             return MapToProductDto(updated);
         }
 
+        // Admin Actions
+        public async Task<ApprovedProductDto> ApproveProductAsync(int productId)
+        {
+            var product = await _productRepository.GetByIDWithTracking(productId);
 
+            if (product == null)
+                throw new KeyNotFoundException($"Product with ID {productId} was not found.");
+
+            product.IsPublished = true;
+            product.ApprovalStatus = ProductApprovalStatus.Approved;
+            
+            await _productRepository.SaveChanges();
+            var approved = new ApprovedProductDto
+            {
+                Id = productId,
+                Title = product.Title,
+                SKU = product.SKU,
+                IsPublished = product.IsPublished,
+                ApprovalMessage = $"Product with Title: {product.Title} is published now"
+            };
+
+            return approved;
+        }
+
+        public async Task<RejectedProductDto> RejectProductAsync(ProductToReject dto)
+        {
+            var product = await _productRepository.GetByIDWithTracking(dto.ProductId);
+
+            if (product == null)
+                throw new KeyNotFoundException($"Product with ID {dto.ProductId} was not found.");
+
+            product.IsPublished = false;
+            product.ApprovalStatus = ProductApprovalStatus.Rejected;
+            product.RejectionMessage = dto.RejectionMessage;
+
+            await _productRepository.SaveChanges();
+
+            var rejProduct = await _productRepository.GetByIdAsync(product.Id);
+            var rejected = new RejectedProductDto
+            {
+                Id = rejProduct.Id,
+                Title = rejProduct.Title,
+                SKU = rejProduct.SKU,
+                IsPublished = rejProduct.IsPublished,
+                RejectionMessage = rejProduct.RejectionMessage
+            };
+
+            return rejected;
+        }
 
 
 
