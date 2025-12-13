@@ -87,7 +87,7 @@ namespace ArtEva.Services
             }
             existingSubCategory.Name = req.Name ?? existingSubCategory.Name;
             existingSubCategory.CategoryId = req.CategoryId ?? existingSubCategory.CategoryId;
-            _subCategoryRepository.Update(existingSubCategory);
+           await _subCategoryRepository.UpdateAsync(existingSubCategory);
             await _subCategoryRepository.SaveChanges();
             return new SubCategoryDTO
             {
