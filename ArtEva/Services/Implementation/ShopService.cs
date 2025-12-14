@@ -47,13 +47,9 @@ namespace ArtEva.Services
 
             await _shopRepository.AddAsync(shop);
             await _context.SaveChangesAsync();
-
-
              
         }
-
-       
-
+         
       
         public async Task<ExistShopDto> GetShopByIdAsync(int shopId)
         {

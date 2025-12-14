@@ -12,18 +12,22 @@ namespace ArtEva.Services.Implementation
         private readonly IShopService _shopService;
         private readonly IProductService _productService;
         private readonly IShopRepository _shopRepository;
+        private readonly IConfiguration _config;
+
         public ShopProductService(
             IShopService shopService,
             IProductService productService
-            ,IShopRepository shopRepository)
+            ,IShopRepository shopRepository
+            , IConfiguration config)
         {
             _shopService = shopService;
             _productService = productService;
             _shopRepository = shopRepository;
+            _config = config;
         }
         public async Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId, int pageNumber, int pageSize)
         {
-
+            var baseUrl = _config["UploadSettings:BaseUrl"];
             CreatedShopDto? shop = 
               await _shopRepository.GetShopByOwnerId(userId)
              .Select(s => new CreatedShopDto
@@ -31,12 +35,11 @@ namespace ArtEva.Services.Implementation
                  Id = s.Id,
                  OwnerUserName = s.Owner.UserName,
                  Name = s.Name,
-                 ImageUrl = s.ImageUrl,
+                 ImageUrl = $"{baseUrl}/uploads/shops/{s.ImageUrl}",
                  Description = s.Description,
                  Status = s.Status,
                  RatingAverage = s.RatingAverage,
-
-
+                  
              }).FirstOrDefaultAsync();
 
             var res1 = await _productService.GetShopActiveProductsAsync(shop.Id, pageNumber, pageSize);

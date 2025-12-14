@@ -1,6 +1,8 @@
 using ArtEva.DTOs.Shop;
+using ArtEva.DTOs.Shop.Mappings;
 using ArtEva.Services;
 using ArtEva.Services.Interfaces;
+using ArtEva.ViewModels.Shop;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Numerics;
@@ -60,13 +62,14 @@ namespace ArtEva.Controllers
                 }
 
                 var shop = await _shopProductService.GetShopByOwnerIdAsync(userId,pageNumber, pageSize);
-                
+              var ProductShopViewModel=  ShopMappingExtensions.ToViewModel(shop);
+
                 if (shop == null)
                 {
                     return NotFound(new { message = "No shop found for this user" });
                 }
 
-                return Ok(shop);
+                return Ok(ProductShopViewModel);
             }
             catch (Exception ex)
             {
