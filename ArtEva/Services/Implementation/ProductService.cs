@@ -273,7 +273,11 @@ namespace ArtEva.Services
 
         #endregion
 
+        #region Delete Product
+        //public async Task<Delete>
+        #endregion
         // Admin Actions
+        #region Admin Actions
         public async Task<ApprovedProductDto> ApproveProductAsync(int productId)
         {
             var product = await _productRepository.GetByIDWithTrackingAsync(productId);
@@ -323,7 +327,7 @@ namespace ArtEva.Services
             return rejected;
         }
 
-
+        #endregion
 
 
         #region Private methods
