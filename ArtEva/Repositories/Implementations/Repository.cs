@@ -25,9 +25,9 @@ namespace ArteEva.Repositories
             var res= await _dbSet.AsTracking().FirstOrDefaultAsync(s=>s.Id==id && !s.IsDeleted);
             return res;
         }
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(int id)
         {
-            var res = await _dbSet.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+            var res = await _dbSet.FirstOrDefaultAsync(s=>s.Id == id && !s.IsDeleted);
             return res;
         }
 

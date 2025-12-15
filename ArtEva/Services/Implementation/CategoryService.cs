@@ -37,6 +37,7 @@ namespace ArtEva.Services
 
             return new CategoryDto
             {
+                ID = existingCategory.Id,
                 Name = category.Name,
                 Description = category.Description,
                 ImageUrl = category.ImageUrl,
@@ -66,7 +67,7 @@ namespace ArtEva.Services
             }).ToList();
         }
 
-        public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
+        public async Task<CategoryDto> GetCategoryByIdAsync(int id)
         {
             var existingCategory = await _categoryRepository.GetByIdAsync(id);
             if (existingCategory == null)
@@ -75,12 +76,12 @@ namespace ArtEva.Services
 
             return new CategoryDto
             {
+                ID=existingCategory.Id,
                 Name = existingCategory.Name,
                 Description = existingCategory.Description,
                 ImageUrl = existingCategory.ImageUrl,
             };
-            
-
+              
         }
 
         public async Task<CategoryDto> UpdateCategoryAsync(UpdateCategoryRequestDto request)

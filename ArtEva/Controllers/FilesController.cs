@@ -1,5 +1,6 @@
 ﻿using ArtEva.DTOs;
 using ArtEva.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,8 @@ namespace ArtEva.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Seller")]
+
     public class FilesController : ControllerBase
     {
         private readonly IFileService _fileService;
