@@ -31,6 +31,32 @@ namespace ArtEva.Controllers
 
             return Ok(product);
         }
+        [HttpGet("Active")]
+        public async Task<IActionResult> GetActiveProducts(int shopId, int pageNumber, int pageSize)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var activeProducts = await _shopProductService.GetShopActiveProductsAsync
+                                            (userId, shopId, pageNumber, pageSize);
+            return Ok(activeProducts);
+        }
+
+        [HttpGet("InActive")]
+        public async Task<IActionResult> GetInActiveProducts(int shopId, int pageNumber, int pageSize)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var inActiveProducts = await _shopProductService.GetShopInactiveProductsAsync
+                                            (userId, shopId, pageNumber, pageSize);
+            return Ok(inActiveProducts);
+        }
+
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllProducts(int shopId, int pageNumber, int pageSize)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var allProducts = await _shopProductService.GetAllShopProductsAsync
+                                            (userId, shopId, pageNumber, pageSize);
+            return Ok(allProducts);
+        }
 
         [HttpPatch("/Update")]
         public async Task<IActionResult> UpdateProduct(
@@ -66,6 +92,14 @@ namespace ArtEva.Controllers
             var result = await _shopProductService.UpdateProductStatusAsync(userId, shopId,productId,
                                                                      request.Status);
             return Ok(result);
+        }
+
+        [HttpDelete("{productId:int}")]
+        public async Task<IActionResult> DeleteProduct(int shopId, int productId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _shopProductService.DeleteShopProduct(userId, shopId, productId);
+            return NoContent();
         }
     }
 }

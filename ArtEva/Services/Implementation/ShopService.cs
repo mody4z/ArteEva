@@ -170,7 +170,7 @@ namespace ArtEva.Services
             if (!((shop.Status == ShopStatus.Active && newStatus == ShopStatus.Inactive) ||
                   (shop.Status == ShopStatus.Inactive && newStatus == ShopStatus.Active)))
             {
-                throw new ValidationException(
+                throw new NotValidException(
                     $"Sellers can only toggle status between Active and Inactive. Current status: {shop.Status}"
                 );
             }
@@ -192,7 +192,7 @@ namespace ArtEva.Services
             var shop = await LoadShopOrThrowAsync(shopId);
 
             if (shop.OwnerUserId != userId)
-                throw new ValidationException("You are not the owner of this shop.");
+                throw new NotValidException("You are not the owner of this shop.");
 
             return shop;
         }
@@ -208,7 +208,7 @@ namespace ArtEva.Services
             var shop = await LoadShopOrThrowAsync(shopId);
 
             if (shop.OwnerUserId != userId)
-                throw new ValidationException("You are not the owner of this shop.");
+                throw new NotValidException("You are not the owner of this shop.");
 
             EnsureShopAllowsProductManagement(shop);
 
@@ -224,7 +224,7 @@ namespace ArtEva.Services
             var shop = await _shopRepository.GetByIdAsync(shopId);
 
             if (shop == null)
-                throw new ValidationException("Shop not found.");
+                throw new NotValidException("Shop not found.");
 
             return shop;
         }
@@ -232,7 +232,7 @@ namespace ArtEva.Services
         {
             if (shop.Status != ShopStatus.Active &&
                 shop.Status != ShopStatus.Inactive)
-                throw new ValidationException(
+                throw new NotValidException(
                     $"You cannot manage products while shop status is '{shop.Status}'."
                 );
         }
@@ -240,7 +240,7 @@ namespace ArtEva.Services
         {
             if (shop.Status != ShopStatus.Active &&
                 shop.Status != ShopStatus.Inactive)
-                throw new ValidationException(
+                throw new NotValidException(
                     $"Shop cannot be updated while status is '{shop.Status}'."
                 );
         }

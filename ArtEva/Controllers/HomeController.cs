@@ -1,4 +1,5 @@
 ﻿using ArteEva.Services;
+using ArtEva.Application.Products.Quiries;
 using ArtEva.DTOs.Home;
 using ArtEva.Models.Enums;
 using ArtEva.Services;
@@ -41,11 +42,15 @@ namespace ArtEva.Controllers
             homePageDTO.Categories =
                 (await categoryService.GetAllCategoriesAsync()).ToList();
 
-            var pagedResult = await productService.GetPagedProductsAsync(
-                c => c.ApprovalStatus == ProductApprovalStatus.Approved,
-                page,
-                size
-            );
+            var pagedResult = await productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    ApprovalStatus = ProductApprovalStatus.Approved,
+                    Status = ProductStatus.Active,
+                    IsPublished = true
+                },
+                page, size
+                );
 
             homePageDTO.FeaturedProducts = pagedResult.Items.ToList();
 

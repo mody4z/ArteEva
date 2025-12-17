@@ -1,6 +1,7 @@
 ﻿using ArteEva.Data;
 using ArteEva.Models;
 using ArteEva.Repositories;
+using ArtEva.Application.Products.Quiries;
 using ArtEva.DTOs.Pagination;
 using ArtEva.DTOs.Pagination.Product;
 using ArtEva.DTOs.Product;
@@ -45,11 +46,11 @@ namespace ArtEva.Services.Implementation
               await _shopService.GetShopByOwnerIdAsync(userId);
 
             if (shop == null)
-                throw new ValidationException("You don't have an active shop yet.");
+                throw new NotValidException("You don't have an active shop yet.");
 
 
-            var res1 = await GetShopActiveProductsAsync(shop.Id, pageNumber, pageSize);
-            var res2 = await GetShopInactiveProductsAsync(shop.Id, pageNumber, pageSize);
+            var res1 = await GetShopActiveProductsAsync( userId, shop.Id, pageNumber, pageSize);
+            var res2 = await GetShopInactiveProductsAsync(userId,shop.Id, pageNumber, pageSize);
 
             var ActiveProductDtos = res1.Items.Select(s => new ActiveProductDto()
             {
@@ -92,18 +93,48 @@ namespace ArtEva.Services.Implementation
         }
 
         //Get Shop products paginated
-        // shop owner: active products for this shop
-        public Task<PagedResult<ProductListItemDto>> GetShopActiveProductsAsync(int shopId, int pageNumber, int pageSize)
+        //shop owner: All products for this shop
+        public async Task<PagedResult<ProductListItemDto>> GetAllShopProductsAsync
+            (int userId, int shopId, int pageNumber, int pageSize)
         {
-            Expression<Func<Product, bool>> filter = p => p.ShopId == shopId && p.Status == ProductStatus.Active;
-            return _productService.GetPagedProductsAsync(filter, pageNumber, pageSize);
+            await _shopService.EnsureShopOwnershipAsync(userId, shopId);
+
+            var criteria = new ProductQueryCriteria
+            {
+                ShopId = shopId,
+            };
+
+            return await _productService.GetProductsAsync(criteria, pageNumber, pageSize);
+        }
+
+        // shop owner: active products for this shop
+        public async Task<PagedResult<ProductListItemDto>> GetShopActiveProductsAsync
+            (int userId,int shopId,int pageNumber,int pageSize)
+        {
+            await _shopService.EnsureShopOwnershipAsync(userId, shopId);
+
+            var criteria = new ProductQueryCriteria
+            {
+                ShopId = shopId,
+                Status = ProductStatus.Active
+            };
+
+            return await _productService.GetProductsAsync(criteria,pageNumber,pageSize);
         }
 
         // shop owner: inactive products for this shop
-        public Task<PagedResult<ProductListItemDto>> GetShopInactiveProductsAsync(int shopId, int pageNumber, int pageSize)
+        public async Task<PagedResult<ProductListItemDto>> GetShopInactiveProductsAsync
+            (int userId,int shopId,int pageNumber,int pageSize)
         {
-            Expression<Func<Product, bool>> filter = p => p.ShopId == shopId && p.Status == ProductStatus.InActive;
-            return _productService.GetPagedProductsAsync(filter, pageNumber, pageSize);
+            await _shopService.EnsureShopOwnershipAsync(userId, shopId);
+
+            var criteria = new ProductQueryCriteria
+            {
+                ShopId = shopId,
+                Status = ProductStatus.InActive
+            };
+
+            return await _productService.GetProductsAsync(criteria,pageNumber,pageSize);
         }
 
         #region Update Product
@@ -121,7 +152,7 @@ namespace ArtEva.Services.Implementation
             if (dto.Images != null)
                 await _productService.UpdateProductImagesAsync(product, dto.Images);
 
-            // 7) Return DTO
+            
             return MapToCreatedProductDto(product);
 
         }
@@ -135,7 +166,7 @@ namespace ArtEva.Services.Implementation
             var product = await _productService.GetProductForUpdateAsync(productId);
 
             if (product.ShopId != shopId)
-                throw new ValidationException("Product does not belong to this shop.");
+                throw new NotValidException("Product does not belong to this shop.");
 
             // 3) Update status
             await _productService.UpdateProductStatusInternalAsync(product, status);
@@ -155,7 +186,7 @@ namespace ArtEva.Services.Implementation
             var product = await _productService.GetProductForUpdateAsync(productId);
 
             if (product.ShopId != shopId)
-                throw new ValidationException("Product does not belong to this shop.");
+                throw new NotValidException("Product does not belong to this shop.");
 
             // 3) Update price
             await _productService.UpdateProductPriceInternalAsync(product, newPrice);
@@ -166,6 +197,12 @@ namespace ArtEva.Services.Implementation
                 ProductName = product.Title,
                 Price = product.Price
             };
+        }
+
+        public async Task DeleteShopProduct(int productId,int userId, int shopId)
+        {
+            await _shopService.EnsureShopOwnershipAsync(userId, shopId);
+            await _productService.DeleteProductAsync(productId);
         }
 
         #endregion
@@ -180,13 +217,13 @@ namespace ArtEva.Services.Implementation
             var categoryExists = await _categoryService.ValidateCategoryExistsAsync(categoryId);
 
             if (!categoryExists)
-                throw new ValidationException("Invalid category.");
+                throw new NotValidException("Invalid category.");
 
             // 3. Validate subcategory ownership
             var subCategory = await _subCategoryService.ValidateSubCategoryAsync(subCategoryId, categoryId);
 
             if (!subCategory)
-                throw new ValidationException("Invalid subcategory or does not belong to the selected category.");
+                throw new NotValidException("Invalid subcategory or does not belong to the selected category.");
         }
 
       

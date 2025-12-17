@@ -1,6 +1,8 @@
+using ArtEva.Application.Products.Quiries;
 using ArtEva.DTOs.Admin;
 using ArtEva.DTOs.Product;
 using ArtEva.DTOs.Shop;
+using ArtEva.Models.Enums;
 using ArtEva.Services;
 using ArtEva.ViewModels.Product;
 using Microsoft.AspNetCore.Authorization;
@@ -56,16 +58,73 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet("products/pending")]
-        public async Task<IActionResult> GetPending([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetPendingProducts(int pageNumber = 1,int pageSize = 20)
         {
-            var result = await _productService.GetAdminPendingProductsAsync(page, pageSize);
+            var result = await _productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    IsPublished = false
+                },
+                pageNumber,
+                pageSize);
+
             return Ok(result);
         }
 
         [HttpGet("products/approved")]
-        public async Task<IActionResult> GetApproved([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetApprovedProducts(int pageNumber = 1,int pageSize = 20)
         {
-            var result = await _productService.GetAdminApprovedProductsAsync(page, pageSize);
+            var result = await _productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    IsPublished = true,
+                    ApprovalStatus = ProductApprovalStatus.Approved
+                },
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+        
+        [HttpGet("products/rejected")]
+        public async Task<IActionResult> GetRejectedProducts(int pageNumber = 1,int pageSize = 20)
+        {
+            var result = await _productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    ApprovalStatus = ProductApprovalStatus.Rejected
+                },
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet("products/Active")]
+        public async Task<IActionResult> GetActiveProducts(int pageNumber = 1, int pageSize = 20)
+        {
+            var result = await _productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    Status = ProductStatus.Active
+                },
+                pageNumber,
+                pageSize
+                );
+            return Ok(result);
+        }
+
+        [HttpGet("products/InActive")]
+        public async Task<IActionResult> GetInActiveProducts(int pageNumber = 1, int pageSize = 20)
+        {
+            var result = await _productService.GetProductsAsync(
+                new ProductQueryCriteria
+                {
+                    Status = ProductStatus.InActive
+                },
+                pageNumber,
+                pageSize
+                );
             return Ok(result);
         }
 

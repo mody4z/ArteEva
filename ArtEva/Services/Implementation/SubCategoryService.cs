@@ -29,7 +29,7 @@ namespace ArtEva.Services
 
                 };
             }
-            throw new ValidationException("Category with the same name already exists");
+            throw new NotValidException("Category with the same name already exists");
 
 
 

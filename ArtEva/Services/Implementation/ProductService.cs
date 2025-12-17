@@ -1,6 +1,8 @@
 ﻿using ArteEva.Data;
 using ArteEva.Models;
 using ArteEva.Repositories;
+using ArtEva.Application.Products.Quiries;
+using ArtEva.Application.Products.Specifications;
 using ArtEva.DTOs.Pagination;
 using ArtEva.DTOs.Pagination.Product;
 using ArtEva.DTOs.Product;
@@ -19,23 +21,16 @@ namespace ArtEva.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IProductImageRepository _productImageRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ISubCategoryRepository _subCategoryRepository;
-        private readonly IShopService _shopService;
-
+        private readonly IConfiguration _config;
         public ProductService(
             IProductRepository productRepository,
             IProductImageRepository productImageRepository,
-            ICategoryRepository categoryRepository,
-            ISubCategoryRepository subCategoryRepository,
-            IShopService shopService)
+            IConfiguration config
+            )
         {
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
-            _categoryRepository = categoryRepository;
-            _subCategoryRepository = subCategoryRepository;
-            _shopService = shopService;
-        
+            _config = config;
         }
 
         public async Task<CreatedProductDto> CreateProductAsync( CreateProductDto dto)
@@ -105,58 +100,35 @@ namespace ArtEva.Services
             return product;
         }
         #region Paged products 
-        //READ PAGED BY SHOP
+       
         // Master dynamic paging method
-        public async Task<PagedResult<ProductListItemDto>> GetPagedProductsAsync(
-            Expression<Func<Product, bool>> filter,
-            int pageNumber,
-            int pageSize)
+        public async Task<PagedResult<ProductListItemDto>> GetProductsAsync(
+        ProductQueryCriteria criteria,
+        int pageNumber,
+        int pageSize)
         {
-            // defensive defaults
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Max(1, pageSize);
 
-            var items = await _productRepository.GetPagedProductsWithImagesAsync(filter, pageNumber, pageSize);
-            var total = await _productRepository.CountAsync(filter);
+            var specification = new ProductQuerySpecification(criteria);
 
-            var dtoItems = items.Select(MapToListItemDto).ToList();
+            var items = await _productRepository.GetPagedAsync(
+                specification,
+                pageNumber,
+                pageSize);
+
+            var total = await _productRepository.CountAsync(specification);
 
             return new PagedResult<ProductListItemDto>
             {
-                Items = dtoItems,
+                Items = items.Select(MapToListItemDto).ToList(),
                 TotalCount = total,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };
         }
 
-        //Wrapper for admin: All products
-        public Task<PagedResult<ProductListItemDto>> GetAdminAllProductsPagedAsync(int page, int size)
-        {
-            return GetPagedProductsAsync(p => true, page, size);
-        }
-        // admin wrapper: pending (IsPublished == false)
-        public Task<PagedResult<ProductListItemDto>> GetAdminPendingProductsAsync(int pageNumber, int pageSize)
-        {
-            Expression<Func<Product, bool>> filter = p => p.IsPublished == false;
-            return GetPagedProductsAsync(filter, pageNumber, pageSize);
-        }
-
-        // admin wrapper: approved (IsPublished == true)
-        public Task<PagedResult<ProductListItemDto>> GetAdminApprovedProductsAsync(int pageNumber, int pageSize)
-        {
-            Expression<Func<Product, bool>> filter = p => p.IsPublished == true && p.ApprovalStatus== ProductApprovalStatus.Approved;
-            return GetPagedProductsAsync(filter, pageNumber, pageSize);
-        }
-
        
-        
-        // Buyer Get all Products
-        public Task<PagedResult<ProductListItemDto>> GetAllActiveProductsAsync( int pageNumber, int pageSize)
-        {
-            Expression<Func<Product, bool>> filter = p => p.ApprovalStatus == ProductApprovalStatus.Approved && p.Status == ProductStatus.Active;
-            return GetPagedProductsAsync(filter, pageNumber, pageSize);
-        }
         #endregion
 
         #region Update Product
@@ -196,13 +168,13 @@ namespace ArtEva.Services
         #region Delete Product
         public async Task DeleteProductAsync(int productId)
         {
-            var product = await _productRepository
-                .GetByIDWithTrackingAsync(productId);
+            var product = await _productRepository.GetByIDWithTrackingAsync(productId);
 
             if (product == null || product.IsDeleted)
                 throw new NotFoundException("Product not found.");
 
             product.IsDeleted = true;
+            product.DeletedAt = DateTime.UtcNow;
 
             await _productRepository.SaveChanges();
         }
@@ -263,6 +235,18 @@ namespace ArtEva.Services
 
         #region Private methods
 
+        //Image Helper
+        #region ImageHelper
+        private string BuildProductImageUrl(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            var baseUrl = _config["UploadSettings:BaseUrl"];
+            return $"{baseUrl}/uploads/products/{fileName}";
+        }
+
+        #endregion
         #region Mapping
         private CreatedProductDto MapToProductDto(Product product)
         {
@@ -278,16 +262,16 @@ namespace ArtEva.Services
                 IsPublished = product.IsPublished,
 
                 Images = product.ProductImages?
-                    .OrderBy(i => i.SortOrder)
-                    .Select(i => new CreatedProductImageDto
-                    {
-                        Id = i.Id,
-                        Url = i.Url,
-                        AltText = i.AltText,
-                        SortOrder = i.SortOrder,
-                        IsPrimary = i.IsPrimary
-                    })
-                    .ToList()
+                                .OrderBy(i => i.SortOrder)
+                                .Select(i => new CreatedProductImageDto
+                             {
+                                 Id = i.Id,
+                                 Url = BuildProductImageUrl(i.Url),
+                                 AltText = i.AltText,
+                                 SortOrder = i.SortOrder,
+                                 IsPrimary = i.IsPrimary
+                              })
+                                .ToList()
             };
         }
 
@@ -303,15 +287,15 @@ namespace ArtEva.Services
                 Status = p.Status,
                 IsPublished = p.IsPublished,
                 Images = p.ProductImages?
-                    .OrderBy(i => i.SortOrder)
-                    .Select(i => new ProductImageDto
-                    {
-                        Id = i.Id,
-                        Url = i.Url,
-                        AltText = i.AltText,
-                        SortOrder = i.SortOrder,
-                        IsPrimary = i.IsPrimary
-                    }).ToList() ?? new List<ProductImageDto>()
+                          .OrderBy(i => i.SortOrder)
+                          .Select(i => new ProductImageDto
+                                           {
+                                                Id = i.Id,
+                                                Url = BuildProductImageUrl(i.Url),
+                                                AltText = i.AltText,
+                                                SortOrder = i.SortOrder,
+                                                IsPrimary = i.IsPrimary
+                                            }).ToList() ?? new List<ProductImageDto>()
             };
         }
 
