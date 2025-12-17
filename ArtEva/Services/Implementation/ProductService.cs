@@ -7,6 +7,7 @@ using ArtEva.DTOs.Product;
 using ArtEva.DTOs.ProductImage;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
+using ArtEva.Services.Implementation;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -99,7 +100,7 @@ namespace ArtEva.Services
             var product = await _productRepository.GetByIDWithTrackingAsync(productId);
 
             if (product == null || product.IsDeleted)
-                throw new ValidationException("Product not found.");
+                throw new NotFoundException("Product not found.");
 
             return product;
         }
@@ -171,7 +172,7 @@ namespace ArtEva.Services
         public async Task UpdateProductStatusInternalAsync(Product product, ProductStatus status)
         {
             if (!Enum.IsDefined(typeof(ProductStatus), status))
-                throw new ValidationException("Invalid product status.");
+                throw new NotValidException("Invalid product status.");
 
             product.Status = status;
             product.UpdatedAt = DateTime.UtcNow;
@@ -182,7 +183,7 @@ namespace ArtEva.Services
         public async Task UpdateProductPriceInternalAsync(Product product, decimal newPrice)
         {
             if (newPrice <= 0)
-                throw new ValidationException("Price must be greater than zero.");
+                throw new NotValidException("Price must be greater than zero.");
 
             product.Price = newPrice;
             product.UpdatedAt = DateTime.UtcNow;
@@ -193,7 +194,18 @@ namespace ArtEva.Services
         #endregion
 
         #region Delete Product
-        //public async Task<Delete>
+        public async Task DeleteProductAsync(int productId)
+        {
+            var product = await _productRepository
+                .GetByIDWithTrackingAsync(productId);
+
+            if (product == null || product.IsDeleted)
+                throw new NotFoundException("Product not found.");
+
+            product.IsDeleted = true;
+
+            await _productRepository.SaveChanges();
+        }
         #endregion
         // Admin Actions
         #region Admin Actions
