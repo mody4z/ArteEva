@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace ArtEva
 {
@@ -23,9 +24,17 @@ namespace ArtEva
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers().ConfigureApiBehaviorOptions(
-                options =>
-                    options.SuppressModelStateInvalidFilter = true);
+            builder.Services.AddControllers()
+                    .AddJsonOptions(options =>
+                        {
+                            options.JsonSerializerOptions.Converters.Add(
+                            new JsonStringEnumConverter()
+                                );
+                        })
+                          .ConfigureApiBehaviorOptions(options =>
+                        {
+                    options.SuppressModelStateInvalidFilter = true;
+                        });
             //inject Dbcontext
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options =>

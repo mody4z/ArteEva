@@ -10,19 +10,15 @@ namespace ArtEva.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IConfiguration _config;
 
         public CategoryService(ICategoryRepository categoryRepository , ApplicationDbContext context, IConfiguration config) 
         {
             _categoryRepository = categoryRepository;
-            _config = config;
-
 
         }
 
         public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryRequestDto request)
         {
-            var baseUrl = _config["UploadSettings:BaseUrl"];
 
             var existingCategory = await _categoryRepository.FirstOrDefaultAsync(c=>c.Name==request.Name);
             if(existingCategory != null)
@@ -35,7 +31,7 @@ namespace ArtEva.Services
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                ImageUrl = $"{baseUrl}/uploads/shops/{request.ImageUrl}",
+                ImageUrl = $"uploads/category/{request.ImageUrl}",
 
             };
             await _categoryRepository.AddAsync(category);

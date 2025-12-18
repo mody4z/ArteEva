@@ -1,4 +1,6 @@
-﻿using ArtEva.DTOs.Category;
+﻿using ArteEva.Models;
+using ArtEva.DTOs.Category;
+using ArtEva.Extensions;
 using ArtEva.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +24,12 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await CategoryService.GetAllCategoriesAsync();
+
+            foreach (var category in categories)
+            {
+                category.ImageUrl = Request.BuildPublicUrl(category.ImageUrl);
+            }
+
             return Ok(categories);
         }
         [HttpGet("{id}")]
@@ -33,6 +41,8 @@ namespace ArtEva.Controllers
             {
                 return NotFound(new { message = "Category not found" });
             }
+
+            category.ImageUrl = Request.BuildPublicUrl(category.ImageUrl);
             return Ok(category);
         }
         [HttpPost]

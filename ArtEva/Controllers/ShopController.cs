@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Numerics;
 using System.Security.Claims;
+using ArtEva.Extensions;
 
 namespace ArtEva.Controllers
 {
@@ -62,12 +63,41 @@ namespace ArtEva.Controllers
                 }
 
                 var shop = await _shopProductService.GetShopByOwnerIdAsync(userId,pageNumber, pageSize);
-              var ProductShopViewModel=  ShopMappingExtensions.ToViewModel(shop);
+
 
                 if (shop == null)
                 {
                     return NotFound(new { message = "No shop found for this user" });
                 }
+
+                shop.ImageUrl = Request.BuildPublicUrl(shop.ImageUrl);
+                if (shop.activeProductDtos != null)
+                {
+                    foreach (var product in shop.activeProductDtos)
+                    {
+                        if (product.Images == null) continue;
+
+                        foreach (var image in product.Images)
+                        {
+                            image.Url = Request.BuildPublicUrl(image.Url);
+                        }
+                    }
+                }
+
+                if (shop.inActiveProductDtos != null)
+                {
+                    foreach (var product in shop.inActiveProductDtos)
+                    {
+                        if (product.Images == null) continue;
+
+                        foreach (var image in product.Images)
+                        {
+                            image.Url = Request.BuildPublicUrl(image.Url);
+                        }
+                    }
+                }
+
+                var ProductShopViewModel=  ShopMappingExtensions.ToViewModel(shop);
 
                 return Ok(ProductShopViewModel);
             }

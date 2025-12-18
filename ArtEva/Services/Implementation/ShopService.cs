@@ -15,25 +15,23 @@ namespace ArtEva.Services
     public class ShopService : IShopService
     {
         private readonly IShopRepository _shopRepository;
-        private readonly IConfiguration _config;
 
         public ShopService(IShopRepository shopRepository   ,IConfiguration config)
         {
             _shopRepository = shopRepository;
-             _config = config;
+             
         }
         public async Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId)
         {
-            var baseUrl = _config["UploadSettings:BaseUrl"];
             CreatedShopDto? shop =
               await _shopRepository.GetShopByOwnerId(userId)
-             .Where(s=>s.Status==ShopStatus.Active || s.Status == ShopStatus.Inactive)   
+             //.Where(s=>s.Status==ShopStatus.Active || s.Status == ShopStatus.Inactive)   
              .Select(s => new CreatedShopDto
              {
                  Id = s.Id,
                  OwnerUserName = s.Owner.UserName,
                  Name = s.Name,
-                 ImageUrl = $"{baseUrl}/uploads/shops/{s.ImageUrl}",
+                 ImageUrl = $"uploads/shops/{s.ImageUrl}",
                  Description = s.Description,
                  Status = s.Status,
                  RatingAverage = s.RatingAverage,
