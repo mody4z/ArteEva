@@ -118,7 +118,7 @@ namespace ArtEva.Services.Implementation
         }
 
         // shop owner: inactive products for this shop
-        public async Task<PagedResult<ProductListItemDto>> GetShopInactiveProductsAsync
+        public async Task< PagedResult<ProductListItemDto>> GetShopInactiveProductsAsync
             (int userId,int shopId,int pageNumber,int pageSize)
         {
             await _shopService.EnsureShopOwnershipAsync(userId, shopId);

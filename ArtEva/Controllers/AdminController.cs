@@ -28,6 +28,19 @@ namespace ArtEva.Controllers
             _productService = productService;
         }
 
+        [HttpGet("GetShops")]
+        public async Task<IActionResult> GetShops([FromQuery] ShopStatus? status, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _shopService.GetShopsByStatusAsync(status, pageNumber, pageSize);
+
+            foreach (var shop in result.Items)
+            {
+                shop.ImageUrl = Request.BuildPublicUrl(shop.ImageUrl);
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet("shops/pending")]
         public async Task<IActionResult> GetPendingShops()
         {

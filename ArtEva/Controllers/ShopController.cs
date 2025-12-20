@@ -1,13 +1,12 @@
 using ArtEva.DTOs.Shop;
 using ArtEva.DTOs.Shop.Mappings;
+using ArtEva.Extensions;
+using ArtEva.Models.Enums;
 using ArtEva.Services;
 using ArtEva.Services.Interfaces;
-using ArtEva.ViewModels.Shop;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Numerics;
 using System.Security.Claims;
-using ArtEva.Extensions;
 
 namespace ArtEva.Controllers
 {
@@ -18,7 +17,7 @@ namespace ArtEva.Controllers
         private readonly IShopService _shopService;
         private readonly IShopProductService _shopProductService;
 
-        public ShopController(IShopService shopService,IShopProductService shopProductService)
+        public ShopController(IShopService shopService, IShopProductService shopProductService)
         {
             _shopService = shopService;
             _shopProductService = shopProductService;
@@ -45,7 +44,7 @@ namespace ArtEva.Controllers
 
 
 
-        [HttpGet]  
+        [HttpGet]
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetMyShop(int pageNumber, int pageSize)
         {
@@ -85,15 +84,15 @@ namespace ArtEva.Controllers
 
         [Authorize(Roles = "Seller")]
         [HttpPut]
-        public async Task<IActionResult> UpdateShop(UpdateShopDto updateShopDto) 
+        public async Task<IActionResult> UpdateShop(UpdateShopDto updateShopDto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             int UserID = int.Parse(userIdClaim);
-            
-              await _shopService.UpdateShopInfoAsync(UserID, updateShopDto);
-            
-            return Ok(new 
+
+            await _shopService.UpdateShopInfoAsync(UserID, updateShopDto);
+
+            return Ok(new
             {
                 message = "Shop updated successfully",
             });
@@ -105,10 +104,12 @@ namespace ArtEva.Controllers
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-             int userId = int.Parse(userIdClaim);
-             await _shopService.UpdateShopStatusBySellerAsync(userId, shopId, dto.NewStatus);
+            int userId = int.Parse(userIdClaim);
+            await _shopService.UpdateShopStatusBySellerAsync(userId, shopId, dto.NewStatus);
             return NoContent();
         }
+     
+
 
     }
 }

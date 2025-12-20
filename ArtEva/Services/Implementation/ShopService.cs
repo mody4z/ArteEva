@@ -21,6 +21,48 @@ namespace ArtEva.Services
             _shopRepository = shopRepository;
              
         }
+        public async Task<ShopPagedResult<ExistShopDto>> GetShopsByStatusAsync(ShopStatus? status = null, int pageNumber = 1, int pageSize = 10)
+        {
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageSize <= 0) pageSize = 10;
+            const int MAX_PAGE_SIZE = 100;
+            if (pageSize > MAX_PAGE_SIZE) pageSize = MAX_PAGE_SIZE;
+
+             var query = _shopRepository.GetAllAsync();  
+
+            if (status.HasValue)
+            {
+                query = query.Where(s => s.Status == status.Value);
+            }
+
+             query = query.OrderByDescending(s => s.UpdatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(s => new ExistShopDto
+                {
+                    
+                    OwnerUserId = s.Id,
+                     Name = s.Name,
+                    ImageUrl = $"uploads/shops/{s.ImageUrl}",
+                    Description = s.Description,
+                    Status = s.Status,
+                    RatingAverage = s.RatingAverage,
+                })
+                .ToListAsync();
+
+            return new ShopPagedResult<ExistShopDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId)
         {
             CreatedShopDto? shop =
@@ -80,6 +122,7 @@ namespace ArtEva.Services
             shop.ImageUrl = $"uploads/shops/{shop.ImageUrl}";
 
             return MapToDto2(shop);
+
         }
 
         public async Task<IEnumerable<PendingShopDto>> GetPendingShopsAsync()
