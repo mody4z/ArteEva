@@ -1,14 +1,20 @@
 using ArteEva.Models;
+using ArtEva.Application.Shops.Quiries;
 using ArtEva.DTOs.Shop;
+<<<<<<< HEAD
+=======
 using ArtEva.Models.Enums;
 using System.Threading.Tasks;
+>>>>>>> 7ef7d5956491c35f60b9324084ee1e37d86f8eee
 
 namespace ArtEva.Services
 {
     public interface IShopService
     {
-        Task<ShopPagedResult<ExistShopDto>> GetShopsByStatusAsync(ShopStatus? status, int pageNumber = 1, int pageSize = 10);
-         
+        public Task<ShopPagedResult<ExistShopDto>> GetShopsAsync(
+                     ShopQueryCriteria criteria,
+                     int pageNumber = 1,
+                     int pageSize = 20);
         public Task UpdateShopInfoAsync(int userId, UpdateShopDto dto);
         public Task UpdateShopStatusBySellerAsync(int userId, int shopId, ShopStatus newStatus);
 
