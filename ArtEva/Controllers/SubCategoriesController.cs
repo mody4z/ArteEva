@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ArtEva.Controllers
 {
     [Authorize(Roles = "Admin,SuperAdmin")]
-    [Route("api/[controller]")]
-    [ApiController]
+     [Route("api/[controller]/[action]")]
     public class SubCategoriesController : ControllerBase
     {
         private readonly Services.Interfaces.ISubCategoryService _subCategoryService;
@@ -15,7 +14,16 @@ namespace ArtEva.Controllers
         {
             _subCategoryService = subCategoryService;
         }
-        [HttpGet("{id}")]
+        [HttpGet]
+        public async Task<IActionResult> GetallSubCategoryByCategoryId(int categoryId)
+        {
+          var SubCategory  =await _subCategoryService.GetallSubCategoryByCategoryIdAsync(categoryId);
+
+            return Ok(SubCategory);
+        }
+
+
+          [HttpGet("{id}")]
         public async Task<IActionResult> GetSubCategoryById(int id)
         {
             var subCategory = await _subCategoryService.GetSubCategoryByIdAsync(id);

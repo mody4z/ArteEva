@@ -5,7 +5,6 @@ using ArtEva.DTOs.Category;
 using ArtEva.Services.Interfaces;
 using ArtEva.Services.Implementation;
 using Azure.Core;
-
 namespace ArtEva.Services.Implementations
 {
     public class CategoryService : ICategoryService

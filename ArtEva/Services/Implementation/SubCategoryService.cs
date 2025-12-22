@@ -1,8 +1,10 @@
-﻿using ArteEva.Repositories;
+﻿using ArteEva.Models;
+using ArteEva.Repositories;
 using ArtEva.DTOs.Category;
 using ArtEva.DTOs.subCategory;
 using ArtEva.Services.Implementation;
 using ArtEva.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtEva.Services
 {
@@ -15,6 +17,26 @@ namespace ArtEva.Services
             _subCategoryRepository = subCategoryRepository;
             this.categoryService = categoryService;
         }
+
+        public  async Task<IEnumerable<SubCategoryDTO>> GetallSubCategoryByCategoryIdAsync(int CategoryId)
+        {
+            bool Exits =await categoryService.ValidateCategoryExistsAsync(CategoryId);
+            if (!Exits)
+            {
+                throw new NotFoundException("Category not found");
+
+            }
+            var Sub =await _subCategoryRepository
+                .GetAllAsync()
+                .Where(sub => sub.CategoryId == CategoryId)
+                .Select(sub=> new SubCategoryDTO()
+                {
+                    Name=sub.Name,
+
+                }).ToListAsync();
+            return Sub;
+        }
+
         public async Task<SubCategoryDTO> CreateSubCategoryAsync(CreateSubCategory req)
         {
             var existingSubCategory = await _subCategoryRepository.FirstOrDefaultAsync(c => c.Name == req.Name); ;

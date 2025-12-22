@@ -1,7 +1,3 @@
-using ArteEva.Data;
-using ArteEva.Models;
-using ArteEva.Repositories;
-using ArtEva.Controllers.Filters.Middlewares;
 using ArtEva.Data.Data_Seeder;
 using ArtEva.Services;
 using ArtEva.Services.Implementations;
@@ -14,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
+using ArteEva.Repositories;
+using ArteEva.Data;
+using ArteEva.Models;
 
 namespace ArtEva
 {

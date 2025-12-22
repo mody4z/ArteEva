@@ -13,6 +13,7 @@ namespace ArtEva.DTOs.Shop
 
         public decimal RatingAverage { get; set; }
 
+       
 
 
     }

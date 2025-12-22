@@ -15,7 +15,7 @@ namespace ArtEva.Services
         public Task UpdateShopStatusBySellerAsync(int userId, int shopId, ShopStatus newStatus);
 
         public Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId);
-         
+
         public Task<Shop> EnsureShopOwnershipAsync(int userId, int shopId);
 
         public Task EnsureShopAllowsProductManagementAsync(int shopId);
@@ -28,5 +28,5 @@ namespace ArtEva.Services
         Task<ApproveShopDto> ApproveShopAsync(int shopId);
         Task<RejectedShopDto> RejectShopAsync(int shopId, RejectShopDto dto);
         Task<bool> ShopExistAsync(int shopId);
-     }
+    }
 }
