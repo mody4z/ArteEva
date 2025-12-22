@@ -2,10 +2,9 @@
 using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.DTOs.Category;
-using ArtEva.Services.Implementation;
-using Azure.Core;
+using ArtEva.Services.Interfaces;
 
-namespace ArtEva.Services
+namespace ArtEva.Services.Implementations
 {
     public class CategoryService : ICategoryService
     {

@@ -21,7 +21,7 @@ namespace ArtEva.Services
         public ShopService(IShopRepository shopRepository, IConfiguration config)
         {
             _shopRepository = shopRepository;
-             
+
         }
         public async Task<ShopPagedResult<ExistShopDto>> GetShopsAsync(
                 ShopQueryCriteria criteria,
@@ -78,7 +78,7 @@ namespace ArtEva.Services
                  Status = s.Status,
                  RatingAverage = s.RatingAverage,
              }).FirstOrDefaultAsync();
-             
+
             return shop;
         }
 
@@ -139,7 +139,7 @@ namespace ArtEva.Services
 
         public async Task<ApproveShopDto> ApproveShopAsync(int shopId)
         {
-            var shop =await LoadShopOrThrowAsync(shopId);
+            var shop = await LoadShopOrThrowAsync(shopId);
 
             if (shop.Status != ShopStatus.Pending)
             {
@@ -150,7 +150,7 @@ namespace ArtEva.Services
             shop.RejectionMessage = null;
             shop.UpdatedAt = DateTime.UtcNow;
 
-           await _shopRepository.UpdateAsync(shop);
+            await _shopRepository.UpdateAsync(shop);
             await _shopRepository.SaveChanges();
 
             return MapToDtoApprove(shop);
@@ -169,7 +169,7 @@ namespace ArtEva.Services
             shop.RejectionMessage = dto.RejectionMessage;
             shop.UpdatedAt = DateTime.UtcNow;
 
-           await _shopRepository.UpdateAsync(shop);
+            await _shopRepository.UpdateAsync(shop);
             await _shopRepository.SaveChanges();
 
             return MapToDto3(shop);
@@ -185,7 +185,7 @@ namespace ArtEva.Services
 
         #region MyRegion Update Shop
 
-        public async Task UpdateShopInfoAsync(int userId,UpdateShopDto dto)
+        public async Task UpdateShopInfoAsync(int userId, UpdateShopDto dto)
         {
             var shop = await LoadShopForUpdateAsync(dto.ShopId, userId);
 
@@ -245,14 +245,14 @@ namespace ArtEva.Services
 
             return shop;
         }
-      
+
         public async Task EnsureShopAllowsProductManagementAsync(int shopId)
         {
             var shop = await LoadShopOrThrowAsync(shopId);
 
             EnsureShopAllowsProductManagement(shop);
         }
-        public async Task<Shop> EnsureUserCanManageShopProductsAsync(int userId,int shopId)
+        public async Task<Shop> EnsureUserCanManageShopProductsAsync(int userId, int shopId)
         {
             var shop = await LoadShopOrThrowAsync(shopId);
 
@@ -263,7 +263,7 @@ namespace ArtEva.Services
 
             return shop;
         }
-         
+
 
         #endregion
 
@@ -315,7 +315,7 @@ namespace ArtEva.Services
             return new CreatedShopDto
             {
                 Id = shop.Id,
-             
+
                 Name = shop.Name,
                 ImageUrl = shop.ImageUrl,
                 Description = shop.Description,
@@ -357,14 +357,14 @@ namespace ArtEva.Services
             return new PendingShopDto
             {
                 OwnerUserId = shop.Id,
-                Id=shop.Id,
+                Id = shop.Id,
                 Name = shop.Name,
                 ImageUrl = shop.ImageUrl,
                 Description = shop.Description,
                 Status = shop.Status,
                 RatingAverage = shop.RatingAverage
             };
-        }   
+        }
         private ApproveShopDto MapToDtoApprove(Shop shop)
         {
             return new ApproveShopDto
@@ -379,7 +379,7 @@ namespace ArtEva.Services
         }
 
         #endregion
-  
-    
+
+
     }
 }

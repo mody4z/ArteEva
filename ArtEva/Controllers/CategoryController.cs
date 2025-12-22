@@ -1,7 +1,8 @@
-﻿using ArteEva.Models;
+using ArteEva.Models;
 using ArtEva.DTOs.Category;
 using ArtEva.Extensions;
 using ArtEva.Services;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

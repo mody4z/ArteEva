@@ -1,7 +1,3 @@
-using ArteEva.Models;
-using ArtEva.Application.Products.Quiries;
-using ArtEva.Application.Shops.Quiries;
-using ArtEva.DTOs.Admin;
 using ArtEva.DTOs.Product;
 using ArtEva.DTOs.Shop;
 using ArtEva.Extensions;
@@ -10,6 +6,8 @@ using ArtEva.Services;
 using ArtEva.ViewModels.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ArtEva.Services.Interfaces;
+using ArtEva.DTOs.Admin;
 
 namespace ArtEva.Controllers
 {
