@@ -1,10 +1,8 @@
-<<<<<<< HEAD
-=======
+
 using ArteEva.Models;
 using ArtEva.Application.Products.Quiries;
 using ArtEva.Application.Shops.Quiries;
 using ArtEva.DTOs.Admin;
->>>>>>> 7ef7d5956491c35f60b9324084ee1e37d86f8eee
 using ArtEva.DTOs.Product;
 using ArtEva.DTOs.Shop;
 using ArtEva.Extensions;
