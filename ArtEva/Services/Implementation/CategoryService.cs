@@ -2,11 +2,8 @@
 using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.DTOs.Category;
-<<<<<<< HEAD
 using ArtEva.Services.Interfaces;
-=======
 using ArtEva.Services.Implementation;
->>>>>>> 7ef7d5956491c35f60b9324084ee1e37d86f8eee
 using Azure.Core;
 
 namespace ArtEva.Services.Implementations

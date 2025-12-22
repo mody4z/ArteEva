@@ -128,7 +128,54 @@ namespace ArtEva.Services
             };
         }
 
-       
+        public async Task<PagedResult<ProductCardDto>> GetProductCardsAsync(
+       ProductQueryCriteria criteria,
+       int pageNumber,
+       int pageSize)
+        {
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Max(1, pageSize);
+
+            var specification = new ProductQuerySpecification(criteria);
+
+            var items = await _productRepository.GetPagedAsync(
+                specification,
+                pageNumber,
+                pageSize);
+
+            List<ProductCardDto> productCards = new List<ProductCardDto>();
+            foreach ( var item in items)
+            {
+                productCards.Add(new ProductCardDto
+                {
+                    ProductId = item.Id,
+                    ProductTitle = item.Title,
+                    productPrice = item.Price,
+                    Images = item.ProductImages?
+                          .OrderBy(i => i.SortOrder)
+                          .Select(i => new ProductImageDto
+                          {
+                              Id = i.Id,
+                              Url = BuildProductImageUrl(i.Url),
+                              AltText = i.AltText,
+                              SortOrder = i.SortOrder,
+                              IsPrimary = i.IsPrimary
+                          }).ToList() ?? new List<ProductImageDto>()
+                });
+            }
+
+            var total = await _productRepository.CountAsync(specification);
+            var pagedProductResult = new PagedResult<ProductCardDto>
+            {
+                Items = productCards,
+                TotalCount = total,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            return pagedProductResult;
+        }
+
+
         #endregion
 
         #region Update Product

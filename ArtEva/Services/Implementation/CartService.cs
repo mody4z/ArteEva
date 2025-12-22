@@ -1,8 +1,6 @@
 ﻿using ArteEva.Models;
 using ArteEva.Repositories;
-using ArteEva.Services;
 using ArtEva.Services.Interfaces;
-
 namespace ArtEva.Services.Implementation
 {
     public class CartService  : ICartService

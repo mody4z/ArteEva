@@ -307,12 +307,7 @@ namespace ArtEva.Services.Implementations
             return shop;
         }
 
-
-<<<<<<< HEAD
-=======
         #endregion
-
->>>>>>> 7ef7d5956491c35f60b9324084ee1e37d86f8eee
         #region mapping
         private CreatedShopDto MapToDto(ArteEva.Models.Shop shop)
         {
