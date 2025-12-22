@@ -3,13 +3,9 @@ using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.Application.Shops.Quiries;
 using ArtEva.Application.Shops.Specifications;
-using ArtEva.DTOs.Pagination.Product;
 using ArtEva.DTOs.Shop;
-using ArtEva.DTOs.Shop.Products;
 using ArtEva.Models.Enums;
-
 using ArtEva.Services.Implementation;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -173,7 +169,14 @@ namespace ArtEva.Services.Implementations
             await _shopRepository.UpdateAsync(shop);
             await _shopRepository.SaveChanges();
 
-            return MapToDto3(shop);
+            return new RejectedShopDto
+            {
+                ShopName = shop.Name,
+                RejectionMessage = shop.RejectionMessage,
+                ImageUrl = $"uploads/shops/{shop.ImageUrl}",
+                Description = shop.Description,
+                Status = shop.Status
+            };
         }
         public async Task<bool> ShopExistAsync(int shopId)
         {
@@ -309,20 +312,7 @@ namespace ArtEva.Services.Implementations
 
         #endregion
         #region mapping
-        private CreatedShopDto MapToDto(ArteEva.Models.Shop shop)
-        {
-            return new CreatedShopDto
-            {
-                Id = shop.Id,
-
-                Name = shop.Name,
-                ImageUrl = shop.ImageUrl,
-                Description = shop.Description,
-                Status = shop.Status,
-                RatingAverage = shop.RatingAverage
-            };
-        }
-
+        
         private ExistShopDto MapToDto2(Shop shop)
         {
             return new ExistShopDto
@@ -338,19 +328,7 @@ namespace ArtEva.Services.Implementations
         }
 
 
-        private RejectedShopDto MapToDto3(Shop shop)
-        {
-            return new RejectedShopDto
-            {
-                Name = shop.Name,
-                RejectionMessage = shop.RejectionMessage,
-                OwnerUserName = shop.Owner.UserName,
-                ImageUrl = shop.ImageUrl,
-                Description = shop.Description,
-                Status = shop.Status,
-                RatingAverage = shop.RatingAverage
-            };
-        }
+         
 
         private PendingShopDto MapToDtoPending(Shop shop)
         {
@@ -371,10 +349,9 @@ namespace ArtEva.Services.Implementations
             {
                 OwnerUserId = shop.OwnerUserId,
                 Name = shop.Name,
-                ImageUrl = shop.ImageUrl,
+                ImageUrl = $"uploads/shops/{shop.ImageUrl}",
                 Description = shop.Description,
                 Status = shop.Status,
-                RatingAverage = shop.RatingAverage
             };
         }
 

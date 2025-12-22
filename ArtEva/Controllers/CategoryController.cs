@@ -1,10 +1,8 @@
 using ArtEva.DTOs.Category;
 using ArtEva.Services.Interfaces;
 ﻿using ArteEva.Models;
-using ArtEva.DTOs.Category;
 using ArtEva.Extensions;
 using ArtEva.Services;
-using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +11,7 @@ namespace ArtEva.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles =("Admin,SuperAdmin"))]
-     
+      
     public class CategoryController : ControllerBase
     {
         public ICategoryService CategoryService { get; }
@@ -24,6 +21,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await CategoryService.GetAllCategoriesAsync();
@@ -36,6 +34,7 @@ namespace ArtEva.Controllers
             return Ok(categories);
         }
         [HttpGet("{id}")]
+        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
             var category = await CategoryService.GetCategoryByIdAsync(id);
@@ -49,6 +48,8 @@ namespace ArtEva.Controllers
             return Ok(category);
         }
         [HttpPost]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequestDto request)
         {
             try
@@ -67,6 +68,8 @@ namespace ArtEva.Controllers
              
         }
         [HttpPut]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+
         public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryRequestDto request)
         {
             try
@@ -84,6 +87,8 @@ namespace ArtEva.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+
         public async Task<IActionResult> DeleteCategory(int id)
         {
             try

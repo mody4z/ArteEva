@@ -66,6 +66,7 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> ApproveShop(int shopId)
         {
             var shop = await _shopService.ApproveShopAsync(shopId);
+            shop.ImageUrl = Request.BuildPublicUrl(shop.ImageUrl);
             return Ok(new { message = "Shop approved successfully", shop });
         }
 
@@ -73,6 +74,7 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> RejectShop(int shopId, [FromBody] RejectShopDto dto)
         {
             var shop = await _shopService.RejectShopAsync(shopId, dto);
+            shop.ImageUrl = Request.BuildPublicUrl(shop.ImageUrl);
             return Ok(new { message = "Shop rejected successfully", shop });
         }
 
