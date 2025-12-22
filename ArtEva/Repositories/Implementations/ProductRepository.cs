@@ -25,9 +25,17 @@ namespace ArteEva.Repositories
         int pageNumber,
         int pageSize)
         {
-            return await _context.Products
-                .Where(specification.Criteria)
-                .Include(p => p.ProductImages)
+            IQueryable<Product> query = _context.Products
+         .AsNoTracking()
+         .Where(specification.Criteria)
+         .Include(p => p.ProductImages);
+
+            if (specification.OrderBy != null)
+                query = query.OrderBy(specification.OrderBy);
+            else if (specification.OrderByDescending != null)
+                query = query.OrderByDescending(specification.OrderByDescending);
+
+            return await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -36,8 +44,9 @@ namespace ArteEva.Repositories
         public async Task<int> CountAsync(ISpecification<Product> specification)
         {
             return await _context.Products
-                .Where(specification.Criteria)
-                .CountAsync();
+              .AsNoTracking()
+              .Where(specification.Criteria)
+              .CountAsync();
         }
     }
 }

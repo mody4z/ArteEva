@@ -129,50 +129,47 @@ namespace ArtEva.Services
         }
 
         public async Task<PagedResult<ProductCardDto>> GetProductCardsAsync(
-       ProductQueryCriteria criteria,
-       int pageNumber,
-       int pageSize)
+     PublicProductQueryCriteria criteria,
+     int pageNumber,
+     int pageSize)
         {
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Max(1, pageSize);
 
-            var specification = new ProductQuerySpecification(criteria);
+            var specification = new PublicProductQuerySpecification(criteria);
 
-            var items = await _productRepository.GetPagedAsync(
+            var products = await _productRepository.GetPagedAsync(
                 specification,
                 pageNumber,
                 pageSize);
 
-            List<ProductCardDto> productCards = new List<ProductCardDto>();
-            foreach ( var item in items)
+            var productCards = products.Select(p => new ProductCardDto
             {
-                productCards.Add(new ProductCardDto
-                {
-                    ProductId = item.Id,
-                    ProductTitle = item.Title,
-                    productPrice = item.Price,
-                    Images = item.ProductImages?
-                          .OrderBy(i => i.SortOrder)
-                          .Select(i => new ProductImageDto
-                          {
-                              Id = i.Id,
-                              Url = BuildProductImageUrl(i.Url),
-                              AltText = i.AltText,
-                              SortOrder = i.SortOrder,
-                              IsPrimary = i.IsPrimary
-                          }).ToList() ?? new List<ProductImageDto>()
-                });
-            }
+                ProductId = p.Id,
+                ProductTitle = p.Title,
+                productPrice = p.Price,
+                Images = p.ProductImages
+                    .OrderBy(i => i.SortOrder)
+                    .Select(i => new ProductImageDto
+                    {
+                        Id = i.Id,
+                        Url = BuildProductImageUrl(i.Url),
+                        AltText = i.AltText,
+                        SortOrder = i.SortOrder,
+                        IsPrimary = i.IsPrimary
+                    })
+                    .ToList()
+            }).ToList();
 
-            var total = await _productRepository.CountAsync(specification);
-            var pagedProductResult = new PagedResult<ProductCardDto>
+            var totalCount = await _productRepository.CountAsync(specification);
+
+            return new PagedResult<ProductCardDto>
             {
                 Items = productCards,
-                TotalCount = total,
+                TotalCount = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };
-            return pagedProductResult;
         }
 
 

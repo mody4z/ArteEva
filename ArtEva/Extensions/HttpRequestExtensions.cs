@@ -1,4 +1,7 @@
-﻿using ArtEva.DTOs.Product;
+﻿using ArteEva.Models;
+using ArtEva.DTOs.Pagination;
+using ArtEva.DTOs.Pagination.Product;
+using ArtEva.DTOs.Product;
 using Microsoft.AspNetCore.Http;
 namespace ArtEva.Extensions
 {
@@ -22,6 +25,21 @@ namespace ArtEva.Extensions
                 if (product.Images == null) continue;
 
                 foreach (var image in product.Images)
+                {
+                    image.Url = request.BuildPublicUrl(image.Url);
+                }
+            }
+        }
+
+        public static void BuildPagedProductCardImagesUrls(this HttpRequest request, PagedResult<ProductCardDto> products)
+        {
+            if (products == null) return;
+            IEnumerable<ProductCardDto> productCards = products.Items;
+            foreach (var productCard in productCards)
+            {
+                if (productCard.Images == null) continue;
+
+                foreach (var image in productCard.Images)
                 {
                     image.Url = request.BuildPublicUrl(image.Url);
                 }
