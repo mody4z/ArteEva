@@ -1,4 +1,5 @@
-﻿using ArtEva.Models.Enums;
+﻿using ArtEva.Application.Enum;
+using ArtEva.Models.Enums;
 
 namespace ArtEva.Application.Shops.Quiries
 {
@@ -9,5 +10,7 @@ namespace ArtEva.Application.Shops.Quiries
         public decimal? MinRating { get; set; }
         public decimal? MaxRating { get; set; }
         public string? Name { get; set; }
+        public ProductSortBy SortBy { get; set; } = ProductSortBy.CreatedAt;
+        public SortDirection SortDirection { get; set; } = SortDirection.Desc;
     }
 }

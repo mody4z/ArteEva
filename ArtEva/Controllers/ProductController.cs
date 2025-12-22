@@ -1,4 +1,6 @@
-﻿using ArtEva.Services;
+﻿using ArtEva.Application.Products.Quiries;
+using ArtEva.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,11 +17,25 @@ namespace ArtEva.Controllers
             _productService = productService;
         }
 
-        [HttpGet("{productId}")]
+        [HttpGet("{productId:int}")]
         public async Task<IActionResult> GetProduct(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
             return Ok(product);
+        }
+
+        [HttpGet("public")]
+        public async Task<IActionResult> GetPublicProducts(
+            [FromQuery] PublicProductQueryCriteria query,
+            int pageNumber = 1,
+            int pageSize = 20)
+        {
+            var result = await _productService.GetProductCardsAsync(
+                query,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
         }
     }
 }
