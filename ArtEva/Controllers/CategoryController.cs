@@ -1,4 +1,6 @@
-using ArteEva.Models;
+using ArtEva.DTOs.Category;
+using ArtEva.Services.Interfaces;
+﻿using ArteEva.Models;
 using ArtEva.DTOs.Category;
 using ArtEva.Extensions;
 using ArtEva.Services;

@@ -1,10 +1,7 @@
-using ArteEva.Data;
-using ArteEva.Models;
-using ArteEva.Repositories;
 using ArtEva.Data.Data_Seeder;
 using ArtEva.Services;
-using ArtEva.Services.Implementation;
 using ArtEva.Services.Implementations;
+using ArtEva.Services.Implementation;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
+using ArteEva.Repositories;
+using ArteEva.Data;
+using ArteEva.Models;
 
 namespace ArtEva
 {

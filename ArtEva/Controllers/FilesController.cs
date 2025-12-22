@@ -1,4 +1,5 @@
 ﻿using ArtEva.DTOs;
+using ArtEva.Services;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

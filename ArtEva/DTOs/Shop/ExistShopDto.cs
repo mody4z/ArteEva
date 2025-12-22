@@ -4,6 +4,7 @@ namespace ArtEva.DTOs.Shop
 {
     public class ExistShopDto
     {
+        public string OwnerUserName { get; set; }
         public int OwnerUserId { get; set; }
         public string Name { get; set; }
         public string ImageUrl { get; set; }

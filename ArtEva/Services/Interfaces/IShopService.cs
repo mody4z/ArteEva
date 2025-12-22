@@ -3,7 +3,6 @@ using ArtEva.Application.Shops.Quiries;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
 using System.Threading.Tasks;
-
 namespace ArtEva.Services
 {
     public interface IShopService

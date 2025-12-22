@@ -1,9 +1,9 @@
-﻿using ArteEva.Services;
-using ArtEva.Application.Products.Quiries;
+﻿using ArtEva.Application.Products.Quiries;
 using ArtEva.DTOs.Home;
+using ArtEva.Extensions;
 using ArtEva.Models.Enums;
 using ArtEva.Services;
-using Microsoft.AspNetCore.Http;
+using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -53,6 +53,8 @@ namespace ArtEva.Controllers
                 );
 
             homePageDTO.FeaturedProducts = pagedResult.Items.ToList();
+                Request.BuildProductImagesUrls(homePageDTO.FeaturedProducts);
+         
 
             return Ok(homePageDTO);
         }
