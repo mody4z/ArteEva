@@ -6,6 +6,8 @@ namespace ArtEva.Services.Interfaces
 {
     public interface ISubCategoryService
     {
+        public Task<IEnumerable<SubCategoryDTO>> GetallSubCategoryByCategoryIdAsync(int CategoryId);
+
         Task<SubCategoryDTO> GetSubCategoryByIdAsync(int id);
         Task<IEnumerable<SubCategoryDTO>> GetAllSubCategoriesAsync();
         Task<SubCategoryDTO> CreateSubCategoryAsync(CreateSubCategory req);
