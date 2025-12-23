@@ -6,7 +6,7 @@ namespace ArteEva.Models
     public class Cart : BaseModel
     {
         public int UserId { get; set; }
-
+        public int CartItemId { get; set; }
         // Navigation Properties
         public User User { get; set; }
         public ICollection<CartItem> CartItems { get; set; }
