@@ -193,7 +193,7 @@ namespace ArtEva.Services.Implementations
         {
             var shop = await LoadShopForUpdateAsync(dto.ShopId, userId);
 
-            EnsureShopCanBeUpdated(shop);
+            //EnsureShopCanBeUpdated(shop);
 
             shop.Name = dto.ShopName;
             shop.ImageUrl = dto.ImageUrl;
