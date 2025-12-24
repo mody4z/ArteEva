@@ -9,8 +9,8 @@ namespace ArteEva.Models
 
     public class Order : BaseModel
     {
-        public int BuyerId { get; set; }
-        public User Buyer { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         public int ShopId { get; set; }
         public Shop Shop { get; set; }
@@ -48,10 +48,10 @@ namespace ArteEva.Models
         [Timestamp]
         public byte[] RowVersion { get; set; }
 
+        public ICollection<Payment> Payments { get; set; }
         //public ICollection<OrderItem> OrderItems { get; set; }
-        //public ICollection<Payment> Payments { get; set; }
-        //public ICollection<Shipment> Shipments { get; set; }
-        //public ICollection<Refund> Refunds { get; set; }
-        //public ICollection<Dispute> Disputes { get; set; }
+        public ICollection<Shipment> Shipments { get; set; }
+        public ICollection<Refund> Refunds { get; set; }
+        public ICollection<Dispute> Disputes { get; set; }
     }
 }

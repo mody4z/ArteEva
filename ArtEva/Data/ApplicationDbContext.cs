@@ -30,7 +30,6 @@ namespace ArteEva.Data
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Shipment> Shipments { get; set; }
@@ -67,8 +66,9 @@ namespace ArteEva.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasOne(u => u.Cart)
-                    .WithOne(c => c.User)
-                    .HasForeignKey<Cart>(c => c.UserId);
+                      .WithOne(c => c.User)
+                      .HasForeignKey<Cart>(c => c.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(u => u.Email).IsUnique();
                 entity.HasIndex(u => u.UserName).IsUnique();
@@ -135,12 +135,26 @@ namespace ArteEva.Data
                     .HasForeignKey(pi => pi.ProductId);
             });
 
+            //Cart configurations
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.HasMany(c => c.CartItems)
+                      .WithOne(ci => ci.Cart)
+                      .HasForeignKey(ci => ci.CartId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
             // CartItem configurations
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasOne(ci => ci.Cart)
                     .WithMany(c => c.CartItems)
                     .HasForeignKey(ci => ci.CartId);
+                
+                entity.HasOne(ci => ci.User)
+                      .WithMany(u => u.CartItems)
+                      .HasForeignKey(ci => ci.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(ci => ci.Product)
                     .WithMany(p => p.CartItems)
@@ -149,7 +163,8 @@ namespace ArteEva.Data
 
                 entity.HasIndex(ci => new { ci.CartId, ci.ProductId }).IsUnique();
 
-                entity.Property(ci => ci.UnitPriceSnapshot).HasPrecision(18, 2);
+                entity.Property(ci => ci.UnitPrice).HasPrecision(18, 2);
+                entity.Property(ci => ci.price).HasPrecision(18, 2);
             });
 
             // Address configurations
@@ -164,6 +179,11 @@ namespace ArteEva.Data
             // Order configurations
             modelBuilder.Entity<Order>(entity =>
             {
+                entity.HasOne(o => o.Product)
+                      .WithMany()
+                      .HasForeignKey(o => o.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
                 entity.HasOne(o => o.User)
                     .WithMany(u => u.Orders)
                     .HasForeignKey(o => o.UserId)
@@ -183,26 +203,26 @@ namespace ArteEva.Data
 
                 entity.Property(o => o.Subtotal).HasPrecision(18, 2);
                 entity.Property(o => o.ShippingFee).HasPrecision(18, 2);
-                entity.Property(o => o.Discount).HasPrecision(18, 2);
+                //entity.Property(o => o.Discount).HasPrecision(18, 2);
                 entity.Property(o => o.TaxTotal).HasPrecision(18, 2);
                 entity.Property(o => o.GrandTotal).HasPrecision(18, 2);
             });
 
             // OrderItem configurations
-            modelBuilder.Entity<OrderItem>(entity =>
-            {
-                entity.HasOne(oi => oi.Order)
-                    .WithMany(o => o.OrderItems)
-                    .HasForeignKey(oi => oi.OrderId);
+            //modelBuilder.Entity<OrderItem>(entity =>
+            //{
+            //    entity.HasOne(oi => oi.Order)
+            //        .WithMany(o => o.OrderItems)
+            //        .HasForeignKey(oi => oi.OrderId);
 
-                entity.HasOne(oi => oi.Product)
-                    .WithMany(p => p.OrderItems)
-                    .HasForeignKey(oi => oi.ProductId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            //    entity.HasOne(oi => oi.Product)
+            //        .WithMany(p => p.OrderItems)
+            //        .HasForeignKey(oi => oi.ProductId)
+            //        .OnDelete(DeleteBehavior.Restrict);
 
-                entity.Property(oi => oi.UnitPriceSnapshot).HasPrecision(18, 2);
-                entity.Property(oi => oi.Subtotal).HasPrecision(18, 2);
-            });
+            //    entity.Property(oi => oi.UnitPriceSnapshot).HasPrecision(18, 2);
+            //    entity.Property(oi => oi.Subtotal).HasPrecision(18, 2);
+            //});
 
             // Payment configurations
             modelBuilder.Entity<Payment>(entity =>
@@ -219,7 +239,7 @@ namespace ArteEva.Data
                 entity.Property(p => p.Amount).HasPrecision(18, 2);
             });
 
-            // Refund configurations
+            //Refund configurations
             modelBuilder.Entity<Refund>(entity =>
             {
                 entity.HasOne(r => r.Order)
@@ -235,7 +255,7 @@ namespace ArteEva.Data
                 entity.Property(r => r.Amount).HasPrecision(18, 2);
             });
 
-            // Shipment configurations
+            //Shipment configurations
             modelBuilder.Entity<Shipment>(entity =>
             {
                 entity.HasOne(s => s.Order)

@@ -34,6 +34,7 @@ namespace ArteEva.Models
         public ICollection<Review> ReceivedReviews { get; set; } // reviews about a buyer
 
         public Cart Cart { get; set; }
+        public ICollection<CartItem> CartItems { get; set; }
 
         #endregion
     }

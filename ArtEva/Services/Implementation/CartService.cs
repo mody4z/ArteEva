@@ -116,7 +116,7 @@ namespace ArtEva.Services.Implementation
             EnsureItemsLoaded(cart);
 
             return cart.CartItems.Sum(i =>
-                i.UnitPriceSnapshot * i.Quantity);
+                i.UnitPrice * i.Quantity);
         }
 
         public async Task SaveAsync()
