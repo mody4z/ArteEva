@@ -80,14 +80,14 @@ namespace ArtEva.Services
         ////////////////////////////////////////////////////////////
         ///Get Actions
         /////////////////////////////////////////////////////////
-        public async Task<Product> GetProductByIdAsync(int productId)
+        public async Task<CreatedProductDto> GetProductByIdAsync(int productId)
         {
             var product = await _productRepository.GetProductWithImagesAsync(productId);
-
             if (product == null || product.IsDeleted)
                 throw new KeyNotFoundException("Product not found.");
+            var existedProduct = MapToProductDto(product);
 
-            return product; 
+            return existedProduct; 
         }
 
         public async Task<Product> GetProductForUpdateAsync(int productId)

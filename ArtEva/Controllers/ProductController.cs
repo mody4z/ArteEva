@@ -1,4 +1,5 @@
 ﻿using ArtEva.Application.Products.Quiries;
+using ArtEva.Extensions;
 using ArtEva.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,7 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> GetProduct(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
+            Request.BuildCreatedProductImagesUrls(product);
             return Ok(product);
         }
 
@@ -30,11 +32,9 @@ namespace ArtEva.Controllers
             int pageNumber = 1,
             int pageSize = 20)
         {
-            var result = await _productService.GetProductCardsAsync(
-                query,
-                pageNumber,
-                pageSize);
-
+            var result = await _productService.GetProductCardsAsync(query,
+                pageNumber,pageSize);
+            Request.BuildPagedProductCardImagesUrls(result);
             return Ok(result);
         }
     }
