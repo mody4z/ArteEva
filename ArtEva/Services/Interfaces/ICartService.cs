@@ -22,10 +22,10 @@ namespace ArtEva.Services.Interfaces
         
         Task<Cart?> GetCartWithItemsAsync(int userId);
        
-        Task AddItemAsync(
-            int cartId,
-            int productId,
-            int quantity);
+        //Task AddItemAsync(
+        //    int cartId,
+        //    int productId,
+        //    int quantity);
 
      }
 }
