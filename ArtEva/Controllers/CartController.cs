@@ -28,14 +28,8 @@ namespace ArtEva.Controllers
         {
             try
             {
-                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user ID");
-
+                var userId = GetUserId();
                 var cart = await _cartService.GetOrCreateCartAsync(userId);
-                 
- 
-
                 return Ok(cart);
             }
             catch (Exception ex)
@@ -50,19 +44,24 @@ namespace ArtEva.Controllers
         [HttpPost("items")]
         public async Task<IActionResult> AddItemToCart([FromBody] AddCartItemRequest request)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userId = Int32.Parse(userIdString);
-
-            var cart = await _cartService.GetOrCreateCartAsync(userId);
-
-            await _cartService.AddItemAsync(
-                cart.CartId,
-                request.ProductId,
-                request.UnitPrice,
-                request.Quantity
-            );
-
-            return Ok(new { message = "Item added to cart successfully" });
+            try
+            {
+                var userId = GetUserId();
+                var cart = await _cartService.AddItemToCartAsync(userId, request);
+                return Ok(new { message = "Item added to cart successfully", cart });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while adding item to cart", error = ex.Message });
+            }
         }
 
         /// <summary>
@@ -74,24 +73,15 @@ namespace ArtEva.Controllers
             try
             {
                 if (request == null || request.Quantity <= 0)
-                {
-                    return BadRequest("Invalid quantity");
-                }
+                    return BadRequest(new { message = "Invalid quantity" });
 
-                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user ID");
-
-                var cart = await _cartService.GetCartWithItemsAsync(userId);
-                if (cart == null)
-                {
-                    return NotFound("Cart not found");
-                }
-
-                await _cartService.UpdateItemQuantityAsync(cart, productId, request.Quantity);
-                await _cartService.SaveAsync();
-
-                return Ok(new { message = "Cart item updated successfully" });
+                var userId = GetUserId();
+                var cart = await _cartService.UpdateCartItemQuantityAsync(userId, productId, request.Quantity);
+                return Ok(new { message = "Cart item updated successfully", cart });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -107,20 +97,13 @@ namespace ArtEva.Controllers
         {
             try
             {
-                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user ID");
-
-                var cart = await _cartService.GetCartWithItemsAsync(userId);
-                if (cart == null)
-                {
-                    return NotFound("Cart not found");
-                }
-
-                await _cartService.RemoveItemAsync(cart, productId);
-                await _cartService.SaveAsync();
-
-                return Ok(new { message = "Item removed from cart successfully" });
+                var userId = GetUserId();
+                var cart = await _cartService.RemoveCartItemAsync(userId, productId);
+                return Ok(new { message = "Item removed from cart successfully", cart });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -136,20 +119,13 @@ namespace ArtEva.Controllers
         {
             try
             {
-                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user ID");
-
-                var cart = await _cartService.GetCartWithItemsAsync(userId);
-                if (cart == null)
-                {
-                    return NotFound("Cart not found");
-                }
-
-                await _cartService.ClearCartAsync(cart);
-                await _cartService.SaveAsync();
-
+                var userId = GetUserId();
+                await _cartService.ClearCartAsync(userId);
                 return Ok(new { message = "Cart cleared successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -165,32 +141,22 @@ namespace ArtEva.Controllers
         {
             try
             {
-                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user ID");
-
-                var cart = await _cartService.GetCartWithItemsAsync(userId);
-                if (cart == null || _cartService.IsCartEmpty(cart))
-                {
-                    return Ok(new
-                    {
-                        itemCount = 0,
-                        totalAmount = 0
-                    });
-                }
-
-                var response = new
-                {
-                    itemCount = cart.CartItems.Count,
-                    totalAmount = _cartService.CalculateCartTotal(cart)
-                };
-
-                return Ok(response);
+                var userId = GetUserId();
+                var summary = await _cartService.GetCartSummaryAsync(userId);
+                return Ok(summary);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while retrieving cart summary", error = ex.Message });
             }
+        }
+
+        private int GetUserId()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdString, out var userId))
+                throw new UnauthorizedAccessException("Invalid user ID");
+            return userId;
         }
     }
 

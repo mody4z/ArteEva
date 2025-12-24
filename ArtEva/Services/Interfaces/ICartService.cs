@@ -5,37 +5,29 @@ namespace ArtEva.Services.Interfaces
 {
     public interface ICartService
     {
-        public Task<CartResponseDto> GetOrCreateCartAsync(int userId);
+        Task<CartResponseDto> GetOrCreateCartAsync(int userId);
         
-        public Task<Cart?> GetCartByUserIdAsync(int userId);
+        Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request);
         
-        public Task<Cart?> GetCartWithItemsAsync(int userId);
+        Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity);
+        
+        Task<CartResponseDto> RemoveCartItemAsync(int userId, int productId);
+        
+        Task ClearCartAsync(int userId);
+        
+        Task<object> GetCartSummaryAsync(int userId);
+
+        // Internal methods
+        Task<Cart?> GetCartByUserIdAsync(int userId);
+        
+        Task<Cart?> GetCartWithItemsAsync(int userId);
        
-        public Task AddItemAsync(
+        Task AddItemAsync(
             int cartId,
             int productId,
             decimal unitPriceSnapshot,
             int quantity);
-         
 
-        public Task UpdateItemQuantityAsync(
-            Cart cart,
-            int productId,
-            int quantity);
-        
-        public   Task RemoveItemAsync(Cart cart, int productId);
-       
-
-        public   Task ClearCartAsync(Cart cart);
-
-        public bool IsCartEmpty(Cart cart);
-    
-
-        public decimal CalculateCartTotal(Cart cart);
-        
-
-        public   Task SaveAsync();
-        
-
+        Task SaveAsync();
     }
 }

@@ -124,7 +124,84 @@ namespace ArtEva.Services.Implementation
             await _cartRepository.SaveChanges();
         }
 
-        public async Task UpdateItemQuantityAsync(
+        public async Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.Quantity <= 0)
+                throw new InvalidOperationException("Quantity must be greater than zero.");
+
+            var cart = await GetOrCreateCartAsync(userId);
+
+            await AddItemAsync(
+                cart.CartId,
+                request.ProductId,
+                request.UnitPrice,
+                request.Quantity
+            );
+
+            return await GetOrCreateCartAsync(userId);
+        }
+
+        public async Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity)
+        {
+            if (quantity <= 0)
+                throw new InvalidOperationException("Quantity must be greater than zero.");
+
+            var cart = await GetCartWithItemsAsync(userId);
+            if (cart == null)
+                throw new InvalidOperationException("Cart not found.");
+
+            await UpdateItemQuantityAsync(cart, productId, quantity);
+            await SaveAsync();
+
+            return await GetOrCreateCartAsync(userId);
+        }
+
+        public async Task<CartResponseDto> RemoveCartItemAsync(int userId, int productId)
+        {
+            var cart = await GetCartWithItemsAsync(userId);
+            if (cart == null)
+                throw new InvalidOperationException("Cart not found.");
+
+            await RemoveItemAsync(cart, productId);
+            await SaveAsync();
+
+            return await GetOrCreateCartAsync(userId);
+        }
+
+        public async Task ClearCartAsync(int userId)
+        {
+            var cart = await GetCartWithItemsAsync(userId);
+            if (cart == null)
+                throw new InvalidOperationException("Cart not found.");
+
+            await ClearCartAsync(cart);
+            await SaveAsync();
+        }
+
+        public async Task<object> GetCartSummaryAsync(int userId)
+        {
+            var cart = await GetCartWithItemsAsync(userId);
+            
+            if (cart == null || IsCartEmpty(cart))
+            {
+                return new
+                {
+                    itemCount = 0,
+                    totalAmount = 0m
+                };
+            }
+
+            return new
+            {
+                itemCount = cart.CartItems.Count,
+                totalAmount = CalculateCartTotal(cart)
+            };
+        }
+
+        private async Task UpdateItemQuantityAsync(
             Cart cart,
             int productId,
             int quantity)
@@ -145,7 +222,7 @@ namespace ArtEva.Services.Implementation
             item.Quantity = quantity;
         }
 
-        public async Task RemoveItemAsync(Cart cart, int productId)
+        private async Task RemoveItemAsync(Cart cart, int productId)
         {
             EnsureItemsLoaded(cart);
 
@@ -159,19 +236,19 @@ namespace ArtEva.Services.Implementation
             }
         }
 
-        public async Task ClearCartAsync(Cart cart)
+        private async Task ClearCartAsync(Cart cart)
         {
             EnsureItemsLoaded(cart);
             cart.CartItems.Clear();
         }
 
-        public bool IsCartEmpty(Cart cart)
+        private bool IsCartEmpty(Cart cart)
         {
             EnsureItemsLoaded(cart);
             return !cart.CartItems.Any();
         }
 
-        public decimal CalculateCartTotal(Cart cart)
+        private decimal CalculateCartTotal(Cart cart)
         {
             EnsureItemsLoaded(cart);
 
