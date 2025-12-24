@@ -27,6 +27,5 @@ namespace ArtEva.Services.Interfaces
             int productId,
             int quantity);
 
-        Task SaveAsync();
-    }
+     }
 }
