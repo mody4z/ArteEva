@@ -145,7 +145,7 @@ namespace ArtEva
             builder.Services.AddScoped<IDisputeRepository, DisputeRepository>();
             builder.Services.AddScoped<IShopFollowerRepository, ShopFollowerRepository>();
             builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
-  
+            builder.Services.AddScoped<ICartService,CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
 
  
@@ -197,7 +197,7 @@ namespace ArtEva
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngular",
-                    builder => builder.WithOrigins("http://localhost:4200")
+                    builder => builder.AllowAnyOrigin()
                                       .AllowAnyHeader()
                                       .AllowAnyMethod());
             });
@@ -211,6 +211,7 @@ namespace ArtEva
                 try
                 {
                     await DataSeeder.SeedSuperAdminAsync(services);
+                    await ProductSeeder.SeedProductsAsync(services);
                 }
                 catch (Exception ex)
                 {

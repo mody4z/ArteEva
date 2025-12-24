@@ -12,7 +12,7 @@
             public async Task<Cart?> GetCartWithItemsAsync(int userId)
             {
                 return await _context.Carts
-                    .Include(c => c.CartItems)
+                    .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
                     .FirstOrDefaultAsync(c =>
                         c.UserId == userId &&
                         !c.IsDeleted);

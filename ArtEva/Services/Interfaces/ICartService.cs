@@ -1,20 +1,18 @@
 ﻿using ArteEva.Models;
+using ArtEva.DTOs.CartDTOs;
 
 namespace ArtEva.Services.Interfaces
 {
     public interface ICartService
     {
-        public   Task<Cart> GetOrCreateCartAsync(int userId);
+        public Task<CartResponseDto> GetOrCreateCartAsync(int userId);
         
-
         public Task<Cart?> GetCartByUserIdAsync(int userId);
         
-
         public Task<Cart?> GetCartWithItemsAsync(int userId);
        
-
-        public   Task AddItemAsync(
-            Cart cart,
+        public Task AddItemAsync(
+            int cartId,
             int productId,
             decimal unitPriceSnapshot,
             int quantity);

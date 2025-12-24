@@ -1,39 +1,68 @@
 ﻿using ArteEva.Models;
 using ArteEva.Repositories;
+using ArtEva.DTOs.CartDTOs;
 using ArtEva.Services.Interfaces;
 namespace ArtEva.Services.Implementation
 {
-    public class CartService  : ICartService
+    public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
+        private readonly ICartItemRepository _cartItemRepository;
+        private readonly IProductRepository _productRepository;
 
-        public CartService(ICartRepository cartRepository)
+        public CartService(ICartRepository cartRepository, ICartItemRepository cartItemRepository, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
+            _cartItemRepository = cartItemRepository;
+            _productRepository = productRepository;
         }
 
-        public async Task<Cart> GetOrCreateCartAsync(int userId)
+        public async Task<CartResponseDto> GetOrCreateCartAsync(int userId)
         {
             var cart = await _cartRepository.GetCartWithItemsAsync(userId);
-
+            CartResponseDto cartDto;
             if (cart != null)
-                return cart;
+            {
+                cartDto = new CartResponseDto
+                {
+                    CartId = cart.Id,
+                    UserId = cart.UserId,
+                    UserName = cart.User?.UserName ?? "",
+                    Items = cart.CartItems.Select(item => new CartItemDto
+                    {
+                        Id = item.Id,
+                        ProductId = item.ProductId,
+                        ProductName = item.ProductName,
+                        Quantity = item.Quantity,
+                        Price = item.price
+                    }).ToList()
+                };
+                return cartDto;
+            }
 
             cart = new Cart
             {
                 UserId = userId,
                 CartItems = new List<CartItem>()
             };
-
+            
             await _cartRepository.AddAsync(cart);
-            await _cartRepository.SaveChanges();
+            await SaveAsync();
+            
+            cartDto = new CartResponseDto
+            {
+                CartId = cart.Id,
+                UserId = cart.UserId,
+                UserName = cart.User?.UserName ?? "",
+                Items = new List<CartItemDto>()
+            };
 
-            return cart;
+            return cartDto;
         }
 
-        public Task<Cart?> GetCartByUserIdAsync(int userId)
+        public async Task<Cart?> GetCartByUserIdAsync(int userId)
         {
-            return _cartRepository.FirstOrDefaultAsync(c => c.UserId == userId && !c.IsDeleted);
+            return await _cartRepository.FirstOrDefaultAsync(c => c.UserId == userId && !c.IsDeleted);
         }
 
         public Task<Cart?> GetCartWithItemsAsync(int userId)
@@ -42,11 +71,16 @@ namespace ArtEva.Services.Implementation
         }
 
         public async Task AddItemAsync(
-            Cart cart,
+            int cartId,
             int productId,
             decimal unitPriceSnapshot,
             int quantity)
         {
+            var cart = await _cartRepository.GetByIdAsync(cartId);
+            if (cart == null)
+            {
+                throw new InvalidOperationException("Cart not found.");
+            }
             EnsureItemsLoaded(cart);
 
             if (quantity <= 0)
@@ -61,13 +95,25 @@ namespace ArtEva.Services.Implementation
                 return;
             }
 
-            cart.CartItems.Add(new CartItem
+            // Fetch product to get its title
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+                throw new InvalidOperationException($"Product with ID {productId} not found.");
+
+            var cartItem = new CartItem
             {
+                CartId = cart.Id,
+                UserId = cart.UserId,
                 ProductId = productId,
                 Quantity = quantity,
-             });
+                UnitPrice = unitPriceSnapshot,
+                price = unitPriceSnapshot,
+                ProductName = product.Title
+            };
 
-
+            await _cartItemRepository.AddAsync(cartItem);
+            await _cartItemRepository.SaveChanges();
+            await _cartRepository.SaveChanges();
         }
 
         public async Task UpdateItemQuantityAsync(
@@ -84,6 +130,7 @@ namespace ArtEva.Services.Implementation
             if (quantity <= 0)
             {
                 cart.CartItems.Remove(item);
+                await _cartItemRepository.Delete(item.Id);
                 return;
             }
 
@@ -98,7 +145,10 @@ namespace ArtEva.Services.Implementation
                 .FirstOrDefault(i => i.ProductId == productId);
 
             if (item != null)
+            {
                 cart.CartItems.Remove(item);
+                await _cartItemRepository.Delete(item.Id);
+            }
         }
 
         public async Task ClearCartAsync(Cart cart)
@@ -124,6 +174,7 @@ namespace ArtEva.Services.Implementation
         public async Task SaveAsync()
         {
             await _cartRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
         }
 
         private static void EnsureItemsLoaded(Cart cart)
