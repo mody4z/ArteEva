@@ -23,19 +23,25 @@ namespace ArtEva.Services.Implementation
             CartResponseDto cartDto;
             if (cart != null)
             {
+                var items = cart.CartItems.Select(item => new CartItemDto
+                {
+                    Id = item.Id,
+                    CartId = cart.Id,
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity,
+                    Price = item.price,
+                    Subtotal = item.Quantity * item.price
+                }).ToList();
+
                 cartDto = new CartResponseDto
                 {
                     CartId = cart.Id,
                     UserId = cart.UserId,
                     UserName = cart.User?.UserName ?? "",
-                    Items = cart.CartItems.Select(item => new CartItemDto
-                    {
-                        Id = item.Id,
-                        ProductId = item.ProductId,
-                        ProductName = item.ProductName,
-                        Quantity = item.Quantity,
-                        Price = item.price
-                    }).ToList()
+                    Items = items,
+                    TotalAmount = items.Sum(i => i.Subtotal),
+                    ItemCount = items.Count
                 };
                 return cartDto;
             }
@@ -54,7 +60,9 @@ namespace ArtEva.Services.Implementation
                 CartId = cart.Id,
                 UserId = cart.UserId,
                 UserName = cart.User?.UserName ?? "",
-                Items = new List<CartItemDto>()
+                Items = new List<CartItemDto>(),
+                TotalAmount = 0,
+                ItemCount = 0
             };
 
             return cartDto;
