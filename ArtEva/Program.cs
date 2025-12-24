@@ -211,7 +211,6 @@ namespace ArtEva
                 try
                 {
                     await DataSeeder.SeedSuperAdminAsync(services);
-                    await ProductSeeder.SeedProductsAsync(services);
                 }
                 catch (Exception ex)
                 {
