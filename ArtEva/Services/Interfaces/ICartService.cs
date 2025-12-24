@@ -25,7 +25,6 @@ namespace ArtEva.Services.Interfaces
         Task AddItemAsync(
             int cartId,
             int productId,
-            decimal unitPriceSnapshot,
             int quantity);
 
         Task SaveAsync();

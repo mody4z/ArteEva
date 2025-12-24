@@ -81,7 +81,6 @@ namespace ArtEva.Services.Implementation
         public async Task AddItemAsync(
             int cartId,
             int productId,
-            decimal unitPriceSnapshot,
             int quantity)
         {
             var cart = await _cartRepository.GetByIdAsync(cartId);
@@ -103,7 +102,7 @@ namespace ArtEva.Services.Implementation
                 return;
             }
 
-            // Fetch product to get its title
+            // Fetch product to get its title and price
             var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
                 throw new InvalidOperationException($"Product with ID {productId} not found.");
@@ -114,8 +113,8 @@ namespace ArtEva.Services.Implementation
                 UserId = cart.UserId,
                 ProductId = productId,
                 Quantity = quantity,
-                UnitPrice = unitPriceSnapshot,
-                price = unitPriceSnapshot,
+                UnitPrice = product.Price,
+                price = product.Price,
                 ProductName = product.Title
             };
 
@@ -137,7 +136,6 @@ namespace ArtEva.Services.Implementation
             await AddItemAsync(
                 cart.CartId,
                 request.ProductId,
-                request.UnitPrice,
                 request.Quantity
             );
 
