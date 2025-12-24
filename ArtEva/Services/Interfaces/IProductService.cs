@@ -17,21 +17,15 @@ namespace ArtEva.Services
         Task UpdateProductStatusInternalAsync(Product product, ProductStatus status);
         Task DeleteProductAsync(int productId);
 
-        public Task<Product> GetProductByIdAsync(int productId);
+        Task<CreatedProductDto> GetProductByIdAsync(int productId);
         Task<Product> GetProductForUpdateAsync(int productId);
 
         // master dynamic paging method
         Task<PagedResult<ProductListItemDto>> GetProductsAsync(
-         ProductQueryCriteria criteria,
-         int pageNumber,
-         int pageSize);
+         ProductQueryCriteria criteria,int pageNumber,int pageSize);
 
         Task<PagedResult<ProductCardDto>> GetProductCardsAsync(
-      PublicProductQueryCriteria criteria, int pageNumber, int pageSize);
-        // wrappers for explicit use cases
-        //Task<PagedResult<ProductListItemDto>> GetAdminPendingProductsAsync(int pageNumber, int pageSize);
-        //Task<PagedResult<ProductListItemDto>> GetAdminApprovedProductsAsync(int pageNumber, int pageSize);
-        //Task<PagedResult<ProductListItemDto>> GetAllActiveProductsAsync(int pageNumber, int pageSize);
+         PublicProductQueryCriteria criteria, int pageNumber, int pageSize);
         Task<ApprovedProductDto> ApproveProductAsync(int productId);
         Task<RejectedProductDto> RejectProductAsync(ProductToReject dto);
 

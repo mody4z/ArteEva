@@ -2,7 +2,7 @@
 
 namespace ArtEva.DTOs.Product
 {
-    public class CreatedProductDto
+    public class CreatedProductDto: ProductWithImagesDto
     {
         public int Id { get; set; }
         public int ShopId { get; set; }

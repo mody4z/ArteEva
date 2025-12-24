@@ -45,6 +45,14 @@ namespace ArtEva.Extensions
                 }
             }
         }
+        public static void BuildCreatedProductImagesUrls(this HttpRequest request, CreatedProductDto product)
+        {
+            if (product is null || product.Images is null) return;
+            foreach (var image in product.Images)
+            {
+                image.Url = request.BuildPublicUrl(image.Url);
+            }
+        }
     }
  
 }
