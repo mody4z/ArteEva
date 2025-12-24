@@ -9,7 +9,6 @@ namespace ArtEva.Application.Shops.Specifications
 {
     public class ShopQuerySpecification : BaseSpecification<Shop>
     {
-        public Expression<Func<Shop, bool>> Criteria { get; }
 
         public ShopQuerySpecification(ShopQueryCriteria criteria)
         {
