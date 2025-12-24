@@ -18,6 +18,7 @@ namespace ArtEva.DTOs.Shop.Mappings
                 Description = dto.Description,
                 Status = dto.Status,
                 RatingAverage = dto.RatingAverage,
+                RejectionMessage= dto.RejectionMessage,
 
                 ActiveProductViewModels = dto.activeProductDtos
                     .Select(p => new ActiveProductViewModel

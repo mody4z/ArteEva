@@ -14,6 +14,7 @@ namespace ArtEva.DTOs.Shop
         public string Description { get; set; }
         public ShopStatus Status { get; set; }
         public decimal RatingAverage { get; set; }
+        public string? RejectionMessage { get; set; }
 
         public ICollection<ActiveProductDto> activeProductDtos { get; set; }
         public ICollection<InActiveProductDto> inActiveProductDtos { get; set; }
