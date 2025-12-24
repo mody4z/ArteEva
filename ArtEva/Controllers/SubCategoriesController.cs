@@ -15,7 +15,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
+        [Authorize]
 
         public async Task<IActionResult> GetallSubCategoryByCategoryId(int categoryId)
         {
@@ -25,7 +25,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
+        [Authorize]
         public async Task<IActionResult> GetSubCategoryById(int id)
         {
             var subCategory = await _subCategoryService.GetSubCategoryByIdAsync(id);
@@ -37,7 +37,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Seller,Admin,SuperAdmin")]
+        [Authorize]
         public async Task<IActionResult> GetAllSubCategories()
         {
             var subCategories = await _subCategoryService.GetAllSubCategoriesAsync();

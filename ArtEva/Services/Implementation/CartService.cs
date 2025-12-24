@@ -66,6 +66,8 @@ namespace ArtEva.Services.Implementation
                 ProductId = productId,
                 Quantity = quantity,
              });
+
+
         }
 
         public async Task UpdateItemQuantityAsync(
