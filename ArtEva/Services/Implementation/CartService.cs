@@ -53,8 +53,8 @@ namespace ArtEva.Services.Implementation
             };
             
             await _cartRepository.AddAsync(cart);
-            await SaveAsync();
-            
+            await _cartRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
             cartDto = new CartResponseDto
             {
                 CartId = cart.Id,
@@ -78,69 +78,51 @@ namespace ArtEva.Services.Implementation
             return _cartRepository.GetCartWithItemsAsync(userId);
         }
 
-        public async Task AddItemAsync(
-            int cartId,
-            int productId,
-            int quantity)
-        {
-            var cart = await _cartRepository.GetByIdAsync(cartId);
-            if (cart == null)
-            {
-                throw new InvalidOperationException("Cart not found.");
-            }
-            EnsureItemsLoaded(cart);
-
-            if (quantity <= 0)
-                throw new InvalidOperationException("Quantity must be greater than zero.");
-
-            var existing = cart.CartItems
-                .FirstOrDefault(i => i.ProductId == productId);
-
-            if (existing != null)
-            {
-                existing.Quantity += quantity;
-                return;
-            }
-
-            // Fetch product to get its title and price
-            var product = await _productRepository.GetByIdAsync(productId);
-            if (product == null)
-                throw new InvalidOperationException($"Product with ID {productId} not found.");
-
-            var cartItem = new CartItem
-            {
-                CartId = cart.Id,
-                UserId = cart.UserId,
-                ProductId = productId,
-                Quantity = quantity,
-                UnitPrice = product.Price,
-                price = product.Price,
-                ProductName = product.Title
-            };
-
-            await _cartItemRepository.AddAsync(cartItem);
-            await _cartItemRepository.SaveChanges();
-            await _cartRepository.SaveChanges();
-        }
-
         public async Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request.Quantity <= 0) throw new InvalidOperationException("Quantity must be greater than zero.");
 
-            if (request.Quantity <= 0)
-                throw new InvalidOperationException("Quantity must be greater than zero.");
+            // 1. Get the cart (GetOrCreate handles the creation logic)
+            var cartResponse = await GetOrCreateCartAsync(userId);
+            var cart = await _cartRepository.GetCartWithItemsAsync(userId);
 
-            var cart = await GetOrCreateCartAsync(userId);
+            // 2. Check if product already exists in cart
+            var existingItem = cart.CartItems.FirstOrDefault(i => i.ProductId == request.ProductId && !i.IsDeleted);
 
-            await AddItemAsync(
-                cart.CartId,
-                request.ProductId,
-                request.Quantity
-            );
+            if (existingItem != null)
+            {
+                existingItem.Quantity += request.Quantity;
+            }
+            else
+            {
+                // 3. Fetch product for details
+                var product = await _productRepository.GetByIdAsync(request.ProductId);
+                if (product == null) throw new InvalidOperationException($"Product {request.ProductId} not found.");
 
+                var newItem = new CartItem
+                {
+                    CartId = cart.Id,
+                    UserId = userId,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity,
+                    UnitPrice = product.Price,
+                    price = product.Price,
+                    ProductName = product.Title
+                };
+                await _cartItemRepository.AddAsync(newItem);
+            }
+
+            // 4. SINGLE SAVE: This pushes all changes (updates or adds) to the DB
+            await _cartItemRepository.SaveChanges();
+            await _cartRepository.SaveChanges();
+
+            // 5. Return updated state
             return await GetOrCreateCartAsync(userId);
         }
+        
+
+       
 
         public async Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity)
         {
@@ -152,8 +134,8 @@ namespace ArtEva.Services.Implementation
                 throw new InvalidOperationException("Cart not found.");
 
             await UpdateItemQuantityAsync(cart, productId, quantity);
-            await SaveAsync();
-
+            await _cartRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
             return await GetOrCreateCartAsync(userId);
         }
 
@@ -164,8 +146,8 @@ namespace ArtEva.Services.Implementation
                 throw new InvalidOperationException("Cart not found.");
 
             await RemoveItemAsync(cart, productId);
-            await SaveAsync();
-
+            await _cartRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
             return await GetOrCreateCartAsync(userId);
         }
 
@@ -176,7 +158,8 @@ namespace ArtEva.Services.Implementation
                 throw new InvalidOperationException("Cart not found.");
 
             await ClearCartAsync(cart);
-            await SaveAsync();
+            await _cartRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
         }
 
         public async Task<object> GetCartSummaryAsync(int userId)
@@ -254,11 +237,7 @@ namespace ArtEva.Services.Implementation
                 i.UnitPrice * i.Quantity);
         }
 
-        public async Task SaveAsync()
-        {
-            await _cartRepository.SaveChanges();
-            await _cartItemRepository.SaveChanges();
-        }
+       
 
         private static void EnsureItemsLoaded(Cart cart)
         {
