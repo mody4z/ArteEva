@@ -1,10 +1,9 @@
 ﻿namespace ArtEva.DTOs.CartDTOs
 {
-    public class AddItemRequestWithUserID
+    public class RemoveItemDTO
     {
-        public int  UserID { get; set; }
-        public int ProductId { get; set; }
-        public decimal UnitPrice { get; set; }
-        public int Quantity { get; set; }
+         public int userId { get; set; }
+        public int productId { get; set; }
+       
     }
 }

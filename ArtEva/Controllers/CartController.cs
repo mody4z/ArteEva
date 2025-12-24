@@ -11,7 +11,11 @@ namespace ArtEva.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CartController : ControllerBase
+/*{
+  "userName": "superadmin",
+  "password": "Admin@123*"
+}*/
+public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
         private readonly ILogger<CartController> _logger;

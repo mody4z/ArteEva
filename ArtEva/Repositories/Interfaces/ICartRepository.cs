@@ -4,7 +4,7 @@ namespace ArteEva.Repositories
 {
     public interface ICartRepository : IRepository<Cart>
     {
-        public   Task<Cart?> GetCartWithItemsAsync(int userId);
+        public   Task<Cart?> GetOrCreateCartAsync(int userId);
 
     }
 }
