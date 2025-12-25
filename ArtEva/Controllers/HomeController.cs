@@ -56,7 +56,7 @@ namespace ArtEva.Controllers
                 Request.BuildProductImagesUrls(homePageDTO.FeaturedProducts);
          
 
-            return Ok(homePageDTO);
+            return Ok(homePageDTO); 
         }
     }
 }

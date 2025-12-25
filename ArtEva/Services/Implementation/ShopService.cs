@@ -193,7 +193,7 @@ namespace ArtEva.Services.Implementations
         {
             var shop = await LoadShopForUpdateAsync(dto.ShopId, userId);
 
-            EnsureShopCanBeUpdated(shop);
+            //EnsureShopCanBeUpdated(shop);
 
             shop.Name = dto.ShopName;
             shop.ImageUrl = dto.ImageUrl;
@@ -206,7 +206,6 @@ namespace ArtEva.Services.Implementations
 
             await _shopRepository.SaveChanges();
         }
-
 
         public async Task UpdateShopStatusBySellerAsync(int userId, int shopId, ShopStatus newStatus)
         {
@@ -233,8 +232,6 @@ namespace ArtEva.Services.Implementations
 
             await _shopRepository.SaveChanges();
         }
-
-
 
         #endregion
 
@@ -326,9 +323,6 @@ namespace ArtEva.Services.Implementations
                 RatingAverage = shop.RatingAverage
             };
         }
-
-
-         
 
         private PendingShopDto MapToDtoPending(Shop shop)
         {
