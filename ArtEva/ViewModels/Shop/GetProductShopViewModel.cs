@@ -14,7 +14,7 @@ namespace ArtEva.ViewModels.Shop
         public string Description { get; set; }
         public ShopStatus Status { get; set; }
         public decimal RatingAverage { get; set; }
-
+        public string RejectionMessage { get; set; }
         public ICollection<ActiveProductViewModel> ActiveProductViewModels { get; set; }
         public ICollection<InActiveProductViewModel> inActiveProductViewModels { get; set; }
 

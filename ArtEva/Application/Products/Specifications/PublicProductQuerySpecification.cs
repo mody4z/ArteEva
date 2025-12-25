@@ -8,7 +8,6 @@ namespace ArtEva.Application.Products.Specifications
 {
     public class PublicProductQuerySpecification: BaseSpecification<Product>
     {
-        public Expression<Func<Product, bool>> Criteria { get; }
         public PublicProductQuerySpecification(PublicProductQueryCriteria criteria)
         {
             Criteria = p =>

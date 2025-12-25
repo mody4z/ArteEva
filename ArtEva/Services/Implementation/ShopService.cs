@@ -74,6 +74,7 @@ namespace ArtEva.Services.Implementations
                  Description = s.Description,
                  Status = s.Status,
                  RatingAverage = s.RatingAverage,
+                 RejectionMessage= s.RejectionMessage
              }).FirstOrDefaultAsync();
 
             return shop;

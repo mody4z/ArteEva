@@ -9,13 +9,26 @@
             public CartRepository(ApplicationDbContext context) : base(context)
             {
             }
-            public async Task<Cart?> GetCartWithItemsAsync(int userId)
+            public async Task<Cart?> GetOrCreateCartAsync(int userId)
             {
-                return await _context.Carts
-                    .Include(c => c.CartItems)
+                var cart = await _context.Carts
+                    .AsTracking()
+                    .Include(c => c.User)
                     .FirstOrDefaultAsync(c =>
                         c.UserId == userId &&
                         !c.IsDeleted);
+                
+                if (cart != null)
+                {
+                    // Separately load only non-deleted cart items
+                    await _context.Entry(cart)
+                        .Collection(c => c.CartItems)
+                        .Query()
+                        .Where(ci => !ci.IsDeleted)
+                        .LoadAsync();
+                }
+                
+                return cart;
             }
         }
     }
