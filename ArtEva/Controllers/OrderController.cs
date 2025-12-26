@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ArtEva.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [Authorize] 
     public class OrderController : ControllerBase
     {
@@ -42,7 +42,7 @@ namespace ArtEva.Controllers
             return Ok(order);
         }
 
-        [HttpGet("buyer")]
+        [HttpGet]
         public async Task<IActionResult> GetOrdersForBuyer()
         {
             var buyerId = GetUserIdFromClaims();
@@ -50,7 +50,7 @@ namespace ArtEva.Controllers
             return Ok(orders);
         }
 
-        [HttpGet("seller")]
+        [HttpGet]
         public async Task<IActionResult> GetOrdersForSeller()
         {
             var sellerId = GetUserIdFromClaims();
@@ -58,7 +58,7 @@ namespace ArtEva.Controllers
             return Ok(orders);
         }
 
-        [HttpPost("list")]
+        [HttpPost]
         public async Task<IActionResult> GetOrdersByIds([FromBody] int[] ids)
         {
             if (ids == null || ids.Length == 0) return BadRequest("ids required");
@@ -69,7 +69,7 @@ namespace ArtEva.Controllers
         // ===================== SELLER ACTIONS =====================
         /// <summary>Seller proposes execution duration (moves SellerPending -> BuyerPending)</summary>
         [HttpPost("{id:int}/propose")]
-        public async Task<IActionResult> ProposeExecution(int id, [FromBody] ProposeExecutionDto dto)
+        public async Task<IActionResult> ProposeExecutionBySeller(int id, [FromBody] ProposeExecutionDto dto)
         {
             if (dto == null) return BadRequest("ExecutionDays required");
             var sellerUserId = GetUserIdFromClaims();
@@ -77,14 +77,7 @@ namespace ArtEva.Controllers
             return Ok(updated);
         }
 
-        /// <summary>Seller starts work (optional) - sets InProgress when allowed</summary>
-        [HttpPost("{id:int}/start")]
-        public async Task<IActionResult> StartOrder(int id)
-        {
-            var sellerUserId = GetUserIdFromClaims();
-            var updated = await _orderService.MarkOrderInProgressAsync(id, sellerUserId);
-            return Ok(updated);
-        }
+      
 
         /// <summary>Seller marks finished and ready for buyer confirmation (CompletedBySeller)</summary>
         [HttpPost("{id:int}/ready-for-delivery")]
@@ -98,7 +91,7 @@ namespace ArtEva.Controllers
         // ===================== BUYER ACTIONS =====================
         /// <summary>Buyer accepts or rejects proposed execution (BuyerPending -> InProgress or back to SellerPending)</summary>
         [HttpPost("{id:int}/confirm-execution")]
-        public async Task<IActionResult> ConfirmExecution(int id, [FromBody] ConfirmExecutionDto dto)
+        public async Task<IActionResult> ConfirmExecutionByBuyer(int id, [FromBody] ConfirmExecutionDto dto)
         {
             if (dto == null) return BadRequest("Accept flag required");
             var buyerUserId = GetUserIdFromClaims();
@@ -115,12 +108,6 @@ namespace ArtEva.Controllers
             return Ok(updated);
         }
 
-        // small wrapper to call service and handle possible exceptions nicely
-        private async Task<object> _order_service_confirm_delivery(int orderId, int buyerUserId)
-        {
-            var updated = await _orderService.ConfirmDeliveryByBuyerAsync(orderId, buyerUserId);
-            return updated;
-        }
 
         // ===================== CANCEL =====================
         [HttpPost("{id:int}/cancel")]
@@ -131,6 +118,15 @@ namespace ArtEva.Controllers
             return NoContent();
         }
 
+
+        /// <summary>Seller starts work (optional) - sets InProgress when allowed</summary>
+        [HttpPost("{id:int}/start")]
+        public async Task<IActionResult> StartOrder(int id)
+        {
+            var sellerUserId = GetUserIdFromClaims();
+            var updated = await _orderService.MarkOrderInProgressAsync(id, sellerUserId);
+            return Ok(updated);
+        }
         private int GetUserIdFromClaims()
         {
             var sub = User.FindFirst("sub")?.Value;
@@ -144,6 +140,15 @@ namespace ArtEva.Controllers
 
             throw new InvalidOperationException("Cannot determine user id from token.");
         }
+
+        // small wrapper to call service and handle possible exceptions nicely
+        private async Task<object> _order_service_confirm_delivery(int orderId, int buyerUserId)
+        {
+            var updated = await _orderService.ConfirmDeliveryByBuyerAsync(orderId, buyerUserId);
+            return updated;
+        }
+
+
 
     }
 }

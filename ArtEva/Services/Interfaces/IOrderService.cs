@@ -15,13 +15,12 @@ namespace ArtEva.Services.Interfaces
         // State transitions (Seller sets schedule -> Buyer approves -> Execution -> Delivery -> Complete)
         Task<OrderDto> ProposeExecutionBySellerAsync(int orderId, int sellerUserId, int executionDays);
         Task<OrderDto> ConfirmExecutionByBuyerAsync(int orderId, int buyerUserId, bool accept);
-        Task<OrderDto> MarkOrderInProgressAsync(int orderId, int sellerUserId); // optional
-        Task<OrderDto> MarkOrderWaitingDeliveryAsync(int orderId, int sellerUserId);
         Task<OrderDto> ConfirmDeliveryByBuyerAsync(int orderId, int buyerUserId);
-
         Task CancelOrderAsync(int orderId, int actorUserId, string reason);
+        Task<OrderDto> MarkOrderWaitingDeliveryAsync(int orderId, int sellerUserId);
 
         // Helpers
         Task<IEnumerable<OrderDto>> GetOrdersByIdsAsync(IEnumerable<int> ids);
+        Task<OrderDto> MarkOrderInProgressAsync(int orderId, int sellerUserId); // optional
     }
 }
