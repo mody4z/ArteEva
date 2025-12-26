@@ -1,4 +1,4 @@
-namespace ArteEva.Models
+﻿namespace ArteEva.Models
 {
     public class CartItem : BaseModel
     {
@@ -8,7 +8,12 @@ namespace ArteEva.Models
         public int Quantity { get; set; }
         public string ProductName { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal price { get; set; }
+        public decimal TotalPrice { get; set; }
+
+
+        // 🆕 Order linking
+        public int? OrderId { get; set; }
+        public bool IsConvertedToOrder { get; set; } = false;
 
         // Navigation Properties
         public Cart Cart { get; set; }

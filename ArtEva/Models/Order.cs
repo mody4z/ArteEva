@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArteEva.Models
 {
- 
-
     public class Order : BaseModel
     {
+
+        public int? CartItemId { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
 
@@ -31,7 +31,7 @@ namespace ArteEva.Models
         public decimal UnitPriceSnapshot { get; set; }
         [MaxLength(200)]
         public string ProductTitleSnapshot { get; set; }
-        public string ProductImageSnapshot { get; set; }  
+        public string? ProductImageSnapshot { get; set; }  
 
         public decimal Subtotal { get; set; }
         public decimal ShippingFee { get; set; } = 15;

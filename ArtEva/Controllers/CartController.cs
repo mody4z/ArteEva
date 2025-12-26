@@ -15,7 +15,7 @@ namespace ArtEva.Controllers
   "userName": "superadmin",
   "password": "Admin@123*"
 }*/
-public class CartController : ControllerBase
+    public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
         private readonly ILogger<CartController> _logger;
@@ -26,9 +26,7 @@ public class CartController : ControllerBase
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get current user's cart with all items
-        /// </summary>
+       
         [HttpGet]
         public async Task<IActionResult> GetCart()
         {

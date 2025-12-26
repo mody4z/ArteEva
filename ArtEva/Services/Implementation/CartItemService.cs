@@ -1,113 +1,155 @@
-﻿using ArteEva.Models;
+﻿// CartItemService.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ArteEva.Models;
 using ArteEva.Repositories;
-using ArtEva.DTOs.CartDTOs;
 using ArtEva.DTOs.CartItem;
 using ArtEva.Services.Interfaces;
-using System.Linq.Expressions;
+using ArtEva.DTOs.CartDTOs;
 
 namespace ArtEva.Services.Implementation
 {
     public class CartItemService : ICartItemService
     {
-        private readonly ICartItemRepository cartItemRepository;
-        private readonly IProductRepository productRepository;
+        private readonly ICartItemRepository _cartItemRepository;
+        private readonly IProductRepository _productRepository;
 
-        public CartItemService(ICartItemRepository _cartItemRepository, IProductRepository _productRepository) {
-        cartItemRepository = _cartItemRepository;
-        productRepository = _productRepository;
-        }
-        public async Task<CartItemDto?> AddCartItem(AddCartItemDTO addCartItemDTO )
-        { 
-            // Fetch product details to populate required fields
-            var product = await productRepository.GetByIdAsync(addCartItemDTO.ProductID);
-            if (product == null)
-            {
-                throw new InvalidOperationException($"Product with ID {addCartItemDTO.ProductID} not found.");
-            }
-
-            CartItem cartItem = new CartItem()
-            {
-                CartId = addCartItemDTO.CartID,
-                ProductId = addCartItemDTO.ProductID,
-                Quantity = addCartItemDTO.Quantity,
-                ProductName = product.Title,
-                UnitPrice = product.Price,
-                price = product.Price,
-                UserId = addCartItemDTO.UserID
-            };
-            await cartItemRepository.AddAsync(cartItem);
-            await cartItemRepository.SaveChanges();
-         return new CartItemDto
-            {
-                Id = cartItem.Id,
-                CartId = cartItem.CartId,
-                ProductId = cartItem.ProductId,
-                Quantity = cartItem.Quantity,
-                ProductName = cartItem.ProductName,
-                Price = cartItem.price,
-                Subtotal = cartItem.Quantity * cartItem.price
-            };
-        }
-        
-        public async Task<bool> DeleteCartItem(DeleteCartItemDTO deleteCartItemDTO)
+        public CartItemService(
+            ICartItemRepository cartItemRepository,
+            IProductRepository productRepository)
         {
-            // Find the cart item in the database
-            var cartItem = await cartItemRepository.FirstOrDefaultAsync(ci => 
-                ci.CartId == deleteCartItemDTO.CartID && 
-                ci.ProductId == deleteCartItemDTO.ProductID && 
-                !ci.IsDeleted);
-            
-            if (cartItem == null)
+            _cartItemRepository = cartItemRepository;
+            _productRepository = productRepository;
+        }
+
+        /// <summary>
+        /// جلب كل عناصر الكارت (غير محذوفة وغير محوّلة لأوردر)
+        /// </summary>
+        public async Task<IEnumerable<CartItemDto?>> GetALlCartitemInCart(int cartId)
+        {
+            var items = await _cartItemRepository
+                .QueryByCart(cartId)
+                .ToListAsync();
+
+            return items.Select(MapToDto).Cast<CartItemDto?>().ToList();
+        }
+
+        /// <summary>
+        /// إضافة عنصر للكارت
+        /// لو المنتج موجود بالفعل في نفس الكارت (غير محذوف وغير محوّل) — نزود الكمية
+        /// وإلا نضيف صف جديد مع snapshot (UnitPrice, ProductName, TotalPrice)
+        /// </summary>
+        public async Task<CartItemDto?> AddCartItem(AddCartItemDTO dto)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+            if (dto.Quantity <= 0) throw new InvalidOperationException("Quantity must be greater than zero.");
+
+            var product = await _productRepository.GetByIdAsync(dto.ProductID)
+                ?? throw new InvalidOperationException($"Product with ID {dto.ProductID} not found.");
+
+            // حاول نجيب العنصر الموجود لو موجود (tracked) ليتم تحديثه
+            var existing = await _cartItemRepository.GetByCartAndProductAsync(dto.CartID, dto.ProductID);
+
+            if (existing != null)
             {
-                throw new InvalidOperationException($"Cart item with ProductId {deleteCartItemDTO.ProductID} not found in cart.");
+                if (existing.IsConvertedToOrder)
+                    throw new InvalidOperationException("This cart item has already been converted to an order.");
+
+                existing.Quantity += dto.Quantity;
+                existing.TotalPrice = existing.UnitPrice * existing.Quantity;
+
+                // Save changes (tracked entity)
+                await _cartItemRepository.SaveChanges();
+                return MapToDto(existing);
             }
 
-            // Soft delete the cart item
+            // Create new cart item with snapshots
+            var cartItem = new CartItem
+            {
+                CartId = dto.CartID,
+                UserId = dto.UserID,
+                ProductId = product.Id,
+                ProductName = product.Title ?? string.Empty,
+                UnitPrice = product.Price,
+                Quantity = dto.Quantity,
+                TotalPrice = product.Price * dto.Quantity,
+                IsDeleted = false,
+                IsConvertedToOrder = false
+            };
+
+            await _cartItemRepository.AddAsync(cartItem);
+            await _cartItemRepository.SaveChanges();
+
+            return MapToDto(cartItem);
+        }
+
+        /// <summary>
+        /// تحديث كمية عنصر في الكارت
+        /// </summary>
+        public async Task<CartItemDto?> UpdateCartItem(UpdateCartitemDTO dto)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+            if (dto.Quantity <= 0) throw new InvalidOperationException("Quantity must be greater than zero.");
+
+            var cartItem = await _cartItemRepository.GetByIdAsync(dto.ID)
+                ?? throw new InvalidOperationException("Cart item not found.");
+
+            if (cartItem.IsDeleted)
+                throw new InvalidOperationException("Cannot update a deleted cart item.");
+
+            if (cartItem.IsConvertedToOrder)
+                throw new InvalidOperationException("Cannot update an item already converted to an order.");
+
+            cartItem.Quantity = dto.Quantity;
+            cartItem.TotalPrice = cartItem.UnitPrice * dto.Quantity;
+
+            await _cartItemRepository.SaveChanges();
+
+            return MapToDto(cartItem);
+        }
+
+        /// <summary>
+        /// حذف عنصر (soft-delete)
+        /// </summary>
+        public async Task<bool> DeleteCartItem(DeleteCartItemDTO dto)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            var cartItem = await _cartItemRepository.FirstOrDefaultAsync(ci =>
+                ci.CartId == dto.CartID &&
+                ci.ProductId == dto.ProductID &&
+                !ci.IsDeleted);
+
+            if (cartItem == null)
+                throw new InvalidOperationException("Cart item not found.");
+
+            if (cartItem.IsConvertedToOrder)
+                throw new InvalidOperationException("Cannot delete an item already converted to an order.");
+
             cartItem.IsDeleted = true;
             cartItem.DeletedAt = DateTime.UtcNow;
-            await cartItemRepository.UpdateAsync(cartItem);
-            await cartItemRepository.SaveChanges();
 
-           return true;
-
+            await _cartItemRepository.SaveChanges();
+            return true;
         }
 
-        public async Task<IEnumerable< CartItemDto?>> GetALlCartitemInCart(int CartID)
+        /* ----------------- Helpers ----------------- */
+
+        private static CartItemDto MapToDto(CartItem c)
         {
-            //IQueryable<T> FindAsync(Expression<Func<T, bool>> predicate);
-         IEnumerable<CartItem> cartItems=   cartItemRepository.FindAsync(c => c.CartId == CartID && c.IsDeleted == false).ToList();
-            return cartItems.Select(c => new CartItemDto
+            return new CartItemDto
             {
                 Id = c.Id,
                 CartId = c.CartId,
                 ProductId = c.ProductId,
                 ProductName = c.ProductName,
                 Quantity = c.Quantity,
-                Price = c.price,
-                Subtotal = c.Quantity * c.price
-            }).ToList();
-
-        }
-
-        public async Task<CartItemDto?> UpdateCartItem(UpdateCartitemDTO UpdateCartITemDTO)
-        {
-             
-
-            CartItem cartItem = await cartItemRepository.GetByIdAsync(UpdateCartITemDTO.ID);
-            cartItem.Quantity = UpdateCartITemDTO.Quantity;
-           await cartItemRepository.SaveChanges();
-
-          return new CartItemDto
-            {
-                Id = cartItem.Id,
-                CartId = cartItem.CartId,
-                ProductId = cartItem.ProductId,
-                Quantity = cartItem.Quantity,
-                ProductName = cartItem.ProductName,
-                Price = cartItem.price,
-                Subtotal = cartItem.Quantity * cartItem.price
+                Price = c.UnitPrice,
+                Subtotal = c.TotalPrice
             };
-
         }
     }
 }

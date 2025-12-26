@@ -1,34 +1,41 @@
-    using ArteEva.Data;
-    using ArteEva.Models;
-    using Microsoft.EntityFrameworkCore;
+using ArteEva.Data;
+using ArteEva.Models;
+using Microsoft.EntityFrameworkCore;
 
-    namespace ArteEva.Repositories
+namespace ArteEva.Repositories
+{
+    public class CartRepository : Repository<Cart>, ICartRepository
     {
-        public class CartRepository : Repository<Cart>, ICartRepository
+        public CartRepository(ApplicationDbContext context) : base(context) { }
+
+        public IQueryable<Cart> QueryByUser(int userId)
         {
-            public CartRepository(ApplicationDbContext context) : base(context)
+            return _context.Carts
+                .AsNoTracking()
+                .Where(c => c.UserId == userId && !c.IsDeleted);
+        }
+
+        public async Task<Cart?> GetOrCreateCartWithTrackingAsync(int userId)
+        {
+            var cart = await _context.Carts
+                .AsTracking()
+                .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsDeleted);
+
+            if (cart == null)
             {
+                cart = new Cart { UserId = userId };
+                await _context.Carts.AddAsync(cart);
+                await _context.SaveChangesAsync();
             }
-            public async Task<Cart?> GetOrCreateCartAsync(int userId)
-            {
-                var cart = await _context.Carts
-                    .AsTracking()
-                    .Include(c => c.User)
-                    .FirstOrDefaultAsync(c =>
-                        c.UserId == userId &&
-                        !c.IsDeleted);
-                
-                if (cart != null)
-                {
-                    // Separately load only non-deleted cart items
-                    await _context.Entry(cart)
-                        .Collection(c => c.CartItems)
-                        .Query()
-                        .Where(ci => !ci.IsDeleted)
-                        .LoadAsync();
-                }
-                
-                return cart;
-            }
+
+            return cart;
+        }
+
+        public async Task<Cart?> GetByIdWithTrackingAsync(int cartId)
+        {
+            return await _context.Carts
+                .AsTracking()
+                .FirstOrDefaultAsync(c => c.Id == cartId && !c.IsDeleted);
         }
     }
+}

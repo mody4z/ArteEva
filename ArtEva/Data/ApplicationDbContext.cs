@@ -164,7 +164,7 @@ namespace ArteEva.Data
                 entity.HasIndex(ci => new { ci.CartId, ci.ProductId }).IsUnique();
 
                 entity.Property(ci => ci.UnitPrice).HasPrecision(18, 2);
-                entity.Property(ci => ci.price).HasPrecision(18, 2);
+                entity.Property(ci => ci.TotalPrice).HasPrecision(18, 2);
             });
 
             // Address configurations

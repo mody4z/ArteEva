@@ -1,269 +1,207 @@
 ﻿using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.DTOs.CartDTOs;
-using ArtEva.DTOs.CartItem;
 using ArtEva.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
 namespace ArtEva.Services.Implementation
 {
     public class CartService : ICartService
     {
-        private readonly ICartRepository cartRepository;
-        private readonly ICartItemService cartItemService;
- 
-        public CartService(ICartRepository _cartRepository, ICartItemService _cartItemService)
-        {
-            cartRepository = _cartRepository;
-            cartItemService = _cartItemService;
+        private readonly ICartRepository _cartRepository;
+        private readonly ICartItemRepository _cartItemRepository;
+        private readonly IProductRepository _productRepository;
 
-         }
+        public CartService(
+            ICartRepository cartRepository,
+            ICartItemRepository cartItemRepository,
+            IProductRepository productRepository)
+        {
+            _cartRepository = cartRepository;
+            _cartItemRepository = cartItemRepository;
+            _productRepository = productRepository;
+        }
+
+        /* ===================== QUERY ===================== */
+
+        public IQueryable<Cart> QueryByUser(int userId)
+        {
+            return _cartRepository.QueryByUser(userId);
+        }
+
+        /* ===================== READ ===================== */
 
         public async Task<CartResponseDto> GetOrCreateCartAsync(int userId)
         {
-            var cart = await cartRepository.FirstOrDefaultAsync(c => c.UserId == userId && !c.IsDeleted);
-            CartResponseDto cartDto;
-            if (cart != null)
-            {
-                var items =await cartItemService.GetALlCartitemInCart(cart.Id);
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
 
-                cartDto = new CartResponseDto
+            var items = await _cartItemRepository
+                .QueryByCart(cart.Id)
+                .Select(ci => new CartItemDto
                 {
-                    CartId = cart.Id,
-                    UserId = cart.UserId,
-                    UserName = cart.User?.UserName ?? "",
-                    Items = items.Where(i => i != null).Select(i =>
-                    {
-                        i.CartId = cart.Id;
-                        return i;
-                    }).ToList(),
-                    TotalAmount = items.Sum(i => i.Subtotal),
-                    ItemCount = items.Count()
-                };
-                return cartDto;
-            }
+                    Id = ci.Id,
+                    CartId = ci.CartId,
+                    ProductId = ci.ProductId,
+                    ProductName = ci.ProductName,
+                    Quantity = ci.Quantity,
+                    Price = ci.UnitPrice,
+                    Subtotal = ci.UnitPrice * ci.Quantity
+                })
+                .ToListAsync();
 
-            cart = new Cart
-            {
-                UserId = userId,
-                CartItems = new List<CartItem>()
-            };
-            
-            await cartRepository.AddAsync(cart);
-            await cartRepository.SaveChanges();
-             cartDto = new CartResponseDto
+            return new CartResponseDto
             {
                 CartId = cart.Id,
                 UserId = cart.UserId,
-                UserName = cart.User?.UserName ?? "",
-                Items = new List<CartItemDto>(),
-                TotalAmount = 0,
-                ItemCount = 0
+                Items = items,
+                ItemCount = items.Count,
+                TotalAmount = items.Sum(i => i.Subtotal)
             };
-
-            return cartDto;
         }
+
+        /* ===================== ADD ===================== */
+
         public async Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request)
         {
-            // 1. Get or create the cart first and wait for it to be fully ready
-            var cartDto = await GetOrCreateCartAsync(userId).ConfigureAwait(false);
+            if (request.Quantity <= 0)
+                throw new InvalidOperationException("Quantity must be greater than zero");
 
-            // 2. Prepare the item DTO
-            AddCartItemDTO addCartItemDto = new AddCartItemDTO()
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+
+            var existingItem =
+                await _cartItemRepository.GetByCartAndProductAsync(cart.Id, request.ProductId);
+
+            if (existingItem != null)
             {
-                ProductID = request.ProductId,
-                Quantity = request.Quantity,
-                CartID = cartDto.CartId,
-                UserID = userId
-            };
-
-            // 3. Add the item and wait for completion
-            await cartItemService.AddCartItem(addCartItemDto).ConfigureAwait(false);
-
-            // 4. Refresh and return the final state - ensure previous operation completed
-            return await GetOrCreateCartAsync(userId).ConfigureAwait(false);
-        }
-
-        //public async Task<Cart?> GetCartByUserIdAsync(int userId)
-        //{
-        //    return 
-        //}
-
-        //public Task<Cart?> GetCartWithItemsAsync(int userId)
-        //{
-        //    return cartRepository.GetCartWithItemsAsync(userId);
-        //}
-
-        //public async Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request)
-        //{
-        //    if (request == null) throw new ArgumentNullException(nameof(request));
-        //    if (request.Quantity <= 0) throw new InvalidOperationException("Quantity must be greater than zero.");
-
-        //    // 1. Get or create cart
-        //    var cart = await cartRepository.GetOrCreateCartAsync(userId);
-
-        //    if (cart == null)
-        //    {
-        //        // Create new cart if it doesn't exist
-        //        cart = new Cart
-        //        {
-        //            UserId = userId,
-        //            CartItems = new List<CartItem>()
-        //        };
-        //        await cartRepository.AddAsync(cart);
-
-        //      }
-
-        //    // 2. Check if product already exists in cart
-        //    var existingItem = cart.CartItems.FirstOrDefault(i => i.ProductId == request.ProductId && !i.IsDeleted);
-
-        //    if (existingItem != null)
-        //    {
-        //        // Update existing item quantity (tracked by EF, no need to call Update)
-        //        existingItem.Quantity += request.Quantity;
-        //    }
-        //    else
-        //    {
-        //        // 3. Fetch product for details
-        //        var product = await _productRepository.GetByIdAsync(request.ProductId);
-        //        if (product == null) throw new InvalidOperationException($"Product {request.ProductId} not found.");
-
-        //        var newItem = new CartItem
-        //        {
-        //            CartId = cart.Id,
-        //            UserId = userId,
-        //            ProductId = request.ProductId,
-        //            Quantity = request.Quantity,
-        //            UnitPrice = product.Price,
-        //            price = product.Price,
-        //            ProductName = product.Title
-        //        };
-        //        await _cartItemRepository.AddAsync(newItem);
-        //    }
-
-        //    // 4. Save changes
-        //    await _cartRepository.SaveChanges();
-
-        //    // 5. Return updated state
-        //    return await GetOrCreateCartAsync(userId);
-        //}
-
-
-
-
-        //public async Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity)
-        //{
-        //    if (quantity <= 0)
-        //        throw new InvalidOperationException("Quantity must be greater than zero.");
-
-        //    var cart = await GetCartWithItemsAsync(userId);
-        //    if (cart == null)
-        //        throw new InvalidOperationException("Cart not found.");
-
-        //    await UpdateItemQuantityAsync(cart, productId, quantity);
-        //    await _cartRepository.SaveChanges();
-        //    await _cartItemRepository.SaveChanges();
-        //    return await GetOrCreateCartAsync(userId);
-        //}
-
-        public async Task<CartResponseDto> RemoveCartItemAsync(RemoveItemDTO removeItemDTO)
-        {
-            var cart = await GetOrCreateCartAsync(removeItemDTO.userId);
-            if (cart == null)
-                throw new InvalidOperationException("Cart not found.");
-            DeleteCartItemDTO deleteCartItemDTO = new DeleteCartItemDTO()
+                existingItem.Quantity += request.Quantity;
+                existingItem.TotalPrice = existingItem.Quantity * existingItem.UnitPrice;
+            }
+            else
             {
-                CartID = cart.CartId,
-                ProductID = removeItemDTO.productId
-            };
-            await cartItemService.DeleteCartItem(deleteCartItemDTO);
-            cart = await GetOrCreateCartAsync(removeItemDTO.userId);
-            return cart;
-        }
+                var product = await _productRepository.GetByIdAsync(request.ProductId)
+                    ?? throw new InvalidOperationException("Product not found");
 
-        public async Task ClearCartAsync(int userId)
-        {
-            var cart = await GetCartWithItemsAsync(userId);
-            if (cart == null)
-                throw new InvalidOperationException("Cart not found.");
-
-            await ClearCartAsync(cart);
-            await cartRepository.SaveChanges();
-         }
-
-        public async Task<object> GetCartSummaryAsync(int userId)
-        {
-            var cart = await GetCartWithItemsAsync(userId);
-            
-            if (cart == null || IsCartEmpty(cart))
-            {
-                return new
+                var item = new CartItem
                 {
-                    itemCount = 0,
-                    totalAmount = 0m
+                    CartId = cart.Id,
+                    UserId = userId,
+                    ProductId = product.Id,
+                    ProductName = product.Title,
+                    Quantity = request.Quantity,
+                    UnitPrice = product.Price,
+                    TotalPrice = product.Price * request.Quantity
                 };
+
+                await _cartItemRepository.AddAsync(item);
             }
 
-            return new
-            {
-                itemCount = cart.CartItems.Count,
-                totalAmount = CalculateCartTotal(cart)
-            };
+            await _cartItemRepository.SaveChanges();
+            return await GetOrCreateCartAsync(userId);
         }
 
-      
-      
+        /* ===================== UPDATE ===================== */
 
-        private async Task ClearCartAsync(Cart cart)
+        public async Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity)
         {
-             cart.CartItems.Clear();
+            if (quantity <= 0)
+                throw new InvalidOperationException("Quantity must be greater than zero");
+
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+
+            var item = await _cartItemRepository
+                .GetByCartAndProductAsync(cart.Id, productId)
+                ?? throw new InvalidOperationException("Cart item not found");
+
+            item.Quantity = quantity;
+            item.TotalPrice = item.UnitPrice * quantity;
+
+            await _cartItemRepository.SaveChanges();
+            return await GetOrCreateCartAsync(userId);
         }
 
-        private bool IsCartEmpty(Cart cart)
-        {
-             return !cart.CartItems.Any();
-        }
-
-        private decimal CalculateCartTotal(Cart cart)
-        {
- 
-            return cart.CartItems.Sum(i =>
-                i.UnitPrice * i.Quantity);
-        }
-
-       
-
-       
-
-        public Task<CartResponseDto> UpdateCartItemQuantityAsync(int userId, int productId, int quantity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Cart?> GetCartByUserIdAsync(int userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Cart?> GetCartWithItemsAsync(int userId)
-        {
-            return cartRepository.GetOrCreateCartAsync(userId);
-        }
+        /* ===================== REMOVE ===================== */
 
         public async Task<CartResponseDto> RemoveCartItemAsync(int userId, int productId)
         {
-            var cart = await GetOrCreateCartAsync(userId);
-            if (cart == null)
-                throw new InvalidOperationException("Cart not found.");
-            
-            DeleteCartItemDTO deleteCartItemDTO = new DeleteCartItemDTO()
-            {
-                CartID = cart.CartId,
-                ProductID = productId
-            };
-            
-            await cartItemService.DeleteCartItem(deleteCartItemDTO);
-            
-            // Refresh and return the updated cart
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+
+            var item = await _cartItemRepository
+                .GetByCartAndProductAsync(cart.Id, productId)
+                ?? throw new InvalidOperationException("Item not found");
+
+            item.IsDeleted = true;
+            item.DeletedAt = DateTime.UtcNow;
+
+            await _cartItemRepository.SaveChanges();
             return await GetOrCreateCartAsync(userId);
         }
+
+        /* ===================== CLEAR ===================== */
+
+        public async Task ClearCartAsync(int userId)
+        {
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+            var items = await _cartItemRepository.GetNotConvertedByCartAsync(cart.Id);
+
+            foreach (var item in items)
+            {
+                item.IsDeleted = true;
+                item.DeletedAt = DateTime.UtcNow;
+            }
+
+            await _cartItemRepository.SaveChanges();
+        }
+
+        /* ===================== SUMMARY ===================== */
+
+        public async Task<object> GetCartSummaryAsync(int userId)
+        {
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+
+            var summary = await _cartItemRepository.QueryByCart(cart.Id)
+                .GroupBy(x => 1)
+                .Select(g => new
+                {
+                    itemCount = g.Count(),
+                    totalAmount = g.Sum(x => x.UnitPrice * x.Quantity)
+                })
+                .FirstOrDefaultAsync();
+
+            return summary ?? new { itemCount = 0, totalAmount = 0m };
+        }
+
+
+
+        /* ===================== INTERNAL HELPERS (Missing implementations) ===================== */
+
+        public async Task<Cart?> GetCartByUserIdAsync(int userId)
+        {
+            // Read-only fast query: يرجع الـ Cart لو موجود (بدون تحميل العناصر)
+            return await _cartRepository
+                .QueryByUser(userId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Cart?> GetCartWithItemsAsync(int userId)
+        {
+            // نحصل على الـ Cart مع تتبع (create إذا مش موجود) لأن بعض المسارات تحتاج tracked entity
+            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+
+            if (cart == null)
+                return null;
+
+            // load cart items (only non-deleted & non-converted) using repository query (no heavy Include)
+            var items = await _cartItemRepository
+                .QueryByCart(cart.Id)
+                .ToListAsync();
+
+            // assign loaded items to the tracked cart instance
+            cart.CartItems = items;
+
+            return cart;
+        }
+
     }
 }
+
+ 
