@@ -4,9 +4,19 @@ namespace ArteEva.Repositories
 {
     public interface ICartRepository : IRepository<Cart>
     {
-        IQueryable<Cart> QueryByUser(int userId);
+        /// <summary>
+        /// Gets queryable for carts belonging to a user.
+        /// </summary>
+        IQueryable<Cart> GetCartsByUserQuery(int userId);
 
-        Task<Cart?> GetOrCreateCartWithTrackingAsync(int userId);
-        Task<Cart?> GetByIdWithTrackingAsync(int cartId);
+        /// <summary>
+        /// Gets or creates a tracked cart for the user.
+        /// </summary>
+        Task<Cart> GetOrCreateTrackedCartAsync(int userId);
+
+        /// <summary>
+        /// Gets tracked cart by ID.
+        /// </summary>
+        Task<Cart?> GetTrackedCartByIdAsync(int cartId);
     }
 }

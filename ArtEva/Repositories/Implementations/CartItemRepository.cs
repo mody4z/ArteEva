@@ -3,8 +3,9 @@ using ArteEva.Models;
 using ArtEva.DTOs.Order;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArteEva.Repositories
+namespace ArteEva.Repositories.Implementations
 {
+
     public class CartItemRepository : Repository<CartItem>, ICartItemRepository
     {
         public CartItemRepository(ApplicationDbContext context) : base(context) { }
@@ -34,51 +35,78 @@ namespace ArteEva.Repositories
                
         }
          
-        public IQueryable<CartItem> QueryByCart(int cartId)
+
+  
+        public IQueryable<CartItem> GetActiveItemsInCartQuery(int cartId)
         {
             return _context.CartItems
                 .AsNoTracking()
-                .Where(ci =>
-                    ci.CartId == cartId &&
-                    !ci.IsDeleted &&
-                    !ci.IsConvertedToOrder);
+                .Where(item =>
+                    item.CartId == cartId &&
+                    !item.IsDeleted &&
+                    !item.IsConvertedToOrder);
+        }
+
+        /// <summary>
+        /// Returns queryable for active items across all user's carts.
+        /// </summary>
+        public IQueryable<CartItem> GetActiveItemsByUserQuery(int userId)
+        {
+            return _context.CartItems
+                .AsNoTracking()
+                .Where(item =>
+                    item.UserId == userId &&
+                    !item.IsDeleted &&
+                    !item.IsConvertedToOrder);
+        }
+
+        /// <summary>
+        /// Gets a tracked item for update operations.
+        /// Returns null if not found or if item is deleted/converted.
+        /// </summary>
+        public async Task<CartItem?> GetTrackedItemByCartAndProductAsync(int cartId, int productId)
+        {
+            return await _context.CartItems
+                .FirstOrDefaultAsync(item =>
+                    item.CartId == cartId &&
+                    item.ProductId == productId &&
+                    !item.IsDeleted &&
+                    !item.IsConvertedToOrder);
+        }
+
+        /// <summary>
+        /// Gets all tracked active items in a cart for batch operations.
+        /// </summary>
+        public async Task<List<CartItem>> GetTrackedActiveItemsInCartAsync(int cartId)
+        {
+            return await _context.CartItems
+                .Where(item =>
+                    item.CartId == cartId &&
+                    !item.IsDeleted &&
+                    !item.IsConvertedToOrder)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets a tracked item regardless of IsDeleted or IsConvertedToOrder status.
+        /// Used to reactivate soft-deleted items and avoid unique constraint violations.
+        /// </summary>
+        public async Task<CartItem?> GetTrackedItemByCartAndProductIncludingDeletedAsync(int cartId, int productId)
+        {
+            return await _context.CartItems
+                .FirstOrDefaultAsync(item =>
+                    item.CartId == cartId &&
+                    item.ProductId == productId);
+        }
+
+        public IQueryable<CartItem> QueryByCart(int cartId)
+        {
+            throw new NotImplementedException();
         }
 
         public IQueryable<CartItem> QueryByUser(int userId)
         {
-            return _context.CartItems
-                .AsNoTracking()
-                .Where(ci =>
-                    ci.UserId == userId &&
-                    !ci.IsDeleted &&
-                    !ci.IsConvertedToOrder);
-        }
-
-        public async Task<CartItem?> GetByCartAndProductAsync(int cartId, int productId)
-        {
-            return await _context.CartItems
-                .AsTracking()
-                .FirstOrDefaultAsync(ci =>
-                    ci.CartId == cartId &&
-                    ci.ProductId == productId &&
-                    !ci.IsDeleted &&
-                    !ci.IsConvertedToOrder);
-        }
-
-        public async Task<IEnumerable<CartItem>> GetNotConvertedByCartAsync(int cartId)
-        {
-            return await _context.CartItems
-                .Where(ci =>
-                    ci.CartId == cartId &&
-                    !ci.IsDeleted &&
-                    !ci.IsConvertedToOrder)
-                .ToListAsync();
-        }
-
-        public async Task RemoveRangeAsync(IEnumerable<CartItem> items)
-        {
-            _context.CartItems.RemoveRange(items);
-            await _context.SaveChangesAsync();
+            throw new NotImplementedException();
         }
     }
 }
