@@ -1,5 +1,6 @@
 ﻿using ArteEva.Data;
 using ArteEva.Repositories;
+using ArteEva.Repositories.Implementations;
 using ArtEva.Repositories.Interfaces;
 
 namespace ArtEva.Repositories.Implementations

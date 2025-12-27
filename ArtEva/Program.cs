@@ -123,7 +123,6 @@ namespace ArtEva
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IShopProductService, ShopProductService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();  
             builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
             builder.Services.AddScoped<ICartService,CartService>();
 

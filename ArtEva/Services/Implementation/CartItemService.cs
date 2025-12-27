@@ -153,12 +153,12 @@ namespace ArtEva.Services.Implementation
         /// Returns IQueryable for cart items (deferred execution).
         /// Allows caller to add filters, sorting, paging before execution.
         /// </summary>
-        public IQueryable<CartItemDto> GetCartItemsQuery(int cartId)
-        {
-            return _cartItemRepository
-                .GetActiveItemsInCartQuery(cartId)
-                .ProjectToCartItemDto();
-        }
+        //public IQueryable<CartItemDto> GetCartItemsQuery(int cartId)
+        //{
+        //    return _cartItemRepository
+        //        .GetActiveItemsInCartQuery(cartId)
+        //        .ProjectToCartItemDto();
+        //}
 
         /// <summary>
         /// Returns materialized list of cart items.

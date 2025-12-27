@@ -37,7 +37,7 @@ namespace ArtEva.Services.Interfaces
         /// <summary>
         /// Gets items query for deferred execution.
         /// </summary>
-        IQueryable<CartItemDto> GetCartItemsQuery(int cartId);
+        //IQueryable<CartItemDto> GetCartItemsQuery(int cartId);
 
         /// <summary>
         /// Gets materialized list of cart items.
