@@ -42,6 +42,9 @@ namespace ArteEva.Models
         // Negotiation Logic
         public int? ExecutionDays { get; set; }
         public DateTime? ConfirmedAt { get; set; }
+        public string? CancellationReason { get; set; }
+        public int ? CancelledByUserId { get; set; }
+        public DateTime? CancelledAt { get; set; }
 
         // Calculated Helper
         public DateTime? ExpectedDeliveryDate => ConfirmedAt?.AddDays(ExecutionDays ?? 1);
@@ -55,10 +58,7 @@ namespace ArteEva.Models
         public ICollection<Refund> Refunds { get; set; }
         public ICollection<Dispute> Disputes { get; set; }
 
-    public static Order CreateFrom(
-        CreateOrderFromCartItemDto data,
-        PricingResult pricing,
-        string orderNumber)
+    public static Order CreateFrom(CreateOrderFromCartItemDto data,PricingResult pricing,string orderNumber)
         {
             return new Order
             {

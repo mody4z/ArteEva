@@ -98,12 +98,7 @@ public sealed class OrderOrchestrator:IOrderOrchestrator
         if (!isBuyer && !isSeller)
                  throw new ForbiddenException("You are not the seller or Buyer of this order.");
 
-       await _orderService.CancelAsync(order);
-
-        // Optional: store cancellation metadata
-        //order.CancellationReason = reason;
-        //order.CancelledByUserId = actorUserId;
-        //order.CancelledAt = DateTime.UtcNow;
+       await _orderService.CancelAsync(order, reason,actorUserId);
 
     }
 

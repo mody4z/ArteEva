@@ -173,13 +173,16 @@ namespace ArtEva.Services.Implementation
         }
 
         //// Cancel order (either party in allowed states)
-        public async Task CancelAsync(Order order)
+        public async Task CancelAsync(Order order, string reason,int  actorUserId)
         {
             if (order.Status == OrderStatus.Delivered)
                 throw new InvalidOperationException("Cannot cancel a delivered order.");
 
             order.Status = OrderStatus.Cancelled;
             order.UpdatedAt = DateTime.UtcNow;
+            order.CancellationReason = reason;
+            order.CancelledByUserId = actorUserId;
+            order.CancelledAt = DateTime.UtcNow;
             await _orderRepository.SaveChanges();
         }
 

@@ -21,7 +21,7 @@ namespace ArtEva.Services.Interfaces
         public Task<Order> ProposeExecutionAsync(Order order, int executionDays);
         public  Task<Order> LoadOrderOrThrowAsync(int orderId);
         public Task MarkCompletedBySeller(Order order);
-        public  Task CancelAsync(Order order);
+        public Task CancelAsync(Order order, string reason, int actorUserId);
         public Task<OrderDto> ConfirmDeliveryByBuyerAsync(int orderId, int buyerUserId);
         public Task<OrderDto> ConfirmExecutionByBuyerAsync(int orderId, int buyerUserId, bool accept);
 
