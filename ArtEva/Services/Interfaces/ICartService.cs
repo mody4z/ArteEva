@@ -5,7 +5,7 @@ namespace ArtEva.Services.Interfaces
 {
     public interface ICartService
     {
-        IQueryable<Cart> QueryByUser(int userId);
+        //IQueryable<Cart> QueryByUser(int userId);
 
         Task<CartResponseDto> GetOrCreateCartAsync(int userId);
         Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request);

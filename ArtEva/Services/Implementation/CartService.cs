@@ -24,10 +24,10 @@ namespace ArtEva.Services.Implementation
 
         /* ===================== QUERY ===================== */
 
-        public IQueryable<Cart> QueryByUser(int userId)
-        {
-            return _cartRepository.QueryByUser(userId);
-        }
+        //public IQueryable<Cart> QueryByUser(int userId)
+        //{
+        //    return _cartRepository.QueryByUser(userId);
+        //}
 
         /* ===================== READ ===================== */
 
@@ -64,7 +64,7 @@ namespace ArtEva.Services.Implementation
         public async Task<CartResponseDto> AddItemToCartAsync(int userId, AddCartItemRequest request)
         {
             if (request.Quantity <= 0)
-                throw new InvalidOperationException("Quantity must be greater than zero");
+                throw new NotValidException("Quantity must be greater than zero");
 
             var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
 
@@ -79,7 +79,7 @@ namespace ArtEva.Services.Implementation
             else
             {
                 var product = await _productRepository.GetByIdAsync(request.ProductId)
-                    ?? throw new InvalidOperationException("Product not found");
+                    ?? throw new ("Product not found");
 
                 var item = new CartItem
                 {
