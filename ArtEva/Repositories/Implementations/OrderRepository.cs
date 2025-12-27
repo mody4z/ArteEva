@@ -1,6 +1,8 @@
 // OrderRepository.cs
 using ArteEva.Data;
 using ArteEva.Models;
+using ArtEva.DTOs.Order;
+using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -14,35 +16,71 @@ namespace ArteEva.Repositories
         {
             _context = context;
         }
-
-        public IQueryable<Order> QueryBySeller(int sellerUserId)
+        public  IQueryable<OrderDetailsDto?>  GetOrderDetails(int orderId)
         {
-            // Assumes Shop.OwnerUserId holds seller's user id
-            return _context.Orders
-                .AsNoTracking()
-                .Where(o => !o.IsDeleted && o.Shop != null && o.Shop.OwnerUserId == sellerUserId);
+            return   
+                GetAllAsync()
+                .Where(o => o.Id == orderId)
+                .Select(o => new OrderDetailsDto
+                {
+                    OrderId = o.Id,
+                    BuyerUserId = o.UserId,
+                    SellerUserId = o.Shop.OwnerUserId,
+
+                    OrderNumber = o.OrderNumber,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    GrandTotal = o.GrandTotal
+                });
+                
         }
-
-        public IQueryable<Order> QueryByBuyer(int buyerUserId)
+        public   IQueryable<ArtEva.DTOs.Order.OrderListSellerDto> GetOrdersForSeller(int sellerUserId)
         {
-            return _context.Orders
-                .AsNoTracking()
-                .Where(o => !o.IsDeleted && o.UserId == buyerUserId);
+            return
+                 GetAllAsync()
+                .Where(o => o.Shop.OwnerUserId == sellerUserId)
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new ArtEva.DTOs.Order.OrderListSellerDto
+                {
+                    OrderId = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    GrandTotal = o.GrandTotal,
+                    ExecutionDays = o.ExecutionDays
+                });
+               
         }
-
-        public async Task<Order?> GetByIdWithTrackingAsync(int orderId)
+        public IQueryable<OrderForSellerActionDto> GetOrderForSellerAction(int orderId)
         {
-            return await _context.Orders
+            return GetAllAsync()
+                .Where(o => o.Id == orderId)
                 .AsTracking()
-                .Include(o => o.Shop) // include shop so we can check ownership
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.IsDeleted);
+                .Select(o => new OrderForSellerActionDto
+                {
+                    OrderId = o.Id,
+                    ShopId = o.ShopId,
+                    Status = o.Status,
+                    ExecutionDays=o.ExecutionDays,
+                    GrandTotal = o.GrandTotal,
+                   BuyerUserId=o.UserId
+                });
+        }
+        public IQueryable<ArtEva.DTOs.Order.OrderListBuyerDto> GetOrdersForBuyer(int buyerUserId)
+        {
+            return
+                 GetAllAsync()
+                .Where(o =>o.UserId == buyerUserId)
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new ArtEva.DTOs.Order.OrderListBuyerDto
+                {
+                    OrderId = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    GrandTotal = o.GrandTotal
+                });
         }
 
-        public async Task<IEnumerable<Order>> GetByIdsAsync(IEnumerable<int> ids)
-        {
-            return await _context.Orders
-                .Where(o => ids.Contains(o.Id) && !o.IsDeleted)
-                .ToListAsync();
-        }
     }
 }

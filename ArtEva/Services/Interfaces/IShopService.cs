@@ -1,5 +1,6 @@
 using ArteEva.Models;
 using ArtEva.Application.Shops.Quiries;
+using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
 using System.Threading.Tasks;
@@ -7,6 +8,8 @@ namespace ArtEva.Services
 {
     public interface IShopService
     {
+        public   Task<ShopForOrderActionDto> EnsureSellerCanManageOrdersAsync(int sellerUserId, int shopId);
+
         public Task<ShopPagedResult<ExistShopDto>> GetShopsAsync(
                      ShopQueryCriteria criteria,
                      int pageNumber = 1,

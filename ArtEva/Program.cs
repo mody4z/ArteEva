@@ -122,7 +122,9 @@ namespace ArtEva
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IShopProductService, ShopProductService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();  
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderOrchestrator, OrderOrchestrator>();
+            builder.Services.AddScoped<ICartItemService, CartItemService>();
 
 
             // Register repositories

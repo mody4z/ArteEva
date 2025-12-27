@@ -1,3 +1,4 @@
+using ArtEva.DTOs.Order;
 using ArtEva.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -53,5 +54,37 @@ namespace ArteEva.Models
         public ICollection<Shipment> Shipments { get; set; }
         public ICollection<Refund> Refunds { get; set; }
         public ICollection<Dispute> Disputes { get; set; }
+
+    public static Order CreateFrom(
+        CreateOrderFromCartItemDto data,
+        PricingResult pricing,
+        string orderNumber)
+        {
+            return new Order
+            {
+                UserId = data.UserId,
+                CartItemId = data.CartItemId,
+
+                ProductId = data.ProductId,
+                ShopId = data.ShopId,
+
+                Quantity = data.Quantity,
+
+                UnitPriceSnapshot = data.UnitPrice,
+                ProductTitleSnapshot = data.ProductTitle,
+                ProductImageSnapshot = data.ProductImage,
+
+                Subtotal = data.Subtotal,
+                ShippingFee = pricing.ShippingFee,
+                TaxTotal = pricing.TaxTotal,
+                GrandTotal = pricing.GrandTotal,
+
+                ExecutionDays = data.ExecutionDays,
+                Status = OrderStatus.SellerPending,
+
+                OrderNumber = orderNumber,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
     }
 }

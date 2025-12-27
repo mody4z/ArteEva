@@ -3,6 +3,7 @@ using ArteEva.Models;
 using ArteEva.Repositories;
 using ArtEva.Application.Shops.Quiries;
 using ArtEva.Application.Shops.Specifications;
+using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
 using ArtEva.Services.Implementation;
@@ -262,6 +263,30 @@ namespace ArtEva.Services.Implementations
                 throw new NotValidException("You are not the owner of this shop.");
 
             EnsureShopAllowsProductManagement(shop);
+
+            return shop;
+        }
+        public async Task<ShopForOrderActionDto> EnsureSellerCanManageOrdersAsync(int sellerUserId,int shopId)
+        {
+            var shop = await _shopRepository
+                .GetAllAsync()
+                .Where(s => s.Id == shopId)
+                .Select(s => new ShopForOrderActionDto
+                {
+                    ShopId = s.Id,
+                    OwnerUserId = s.OwnerUserId,
+                    Status = s.Status
+                })
+                .FirstOrDefaultAsync();
+
+            if (shop == null)
+                throw new NotFoundException("Shop not found");
+
+         
+            if (shop.Status != ShopStatus.Active &&
+                shop.Status != ShopStatus.Inactive)
+                throw new NotValidException(
+                    $"Shop status '{shop.Status}' does not allow order actions");
 
             return shop;
         }

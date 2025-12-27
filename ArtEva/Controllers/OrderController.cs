@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using ArtEva.DTOs.Order;
-using ArtEva.DTOs.Orders;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,29 +14,29 @@ namespace ArtEva.Controllers
     [Authorize] 
     public class OrderController : ControllerBase
     {
+        private readonly IOrderOrchestrator _orderOrchestrator;
         private readonly IOrderService _orderService;
 
-        public OrderController(IOrderService orderService)
+        public OrderController (IOrderOrchestrator orderOrchestrator ,IOrderService orderService)
         {
+            _orderOrchestrator = orderOrchestrator;
             _orderService = orderService;
         }
        
         [HttpPost("checkout")]
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(int cartItemId)
         {
             var userId = GetUserIdFromClaims();
-            var orders = await _orderService.CreateOrdersFromCartAsync(userId);
-            // return created orders
+            var orders = await _orderOrchestrator.CreateOrderFromCartItemAsync(cartItemId, userId);
             return Ok(orders);
         }
 
-        // ===================== GET =====================
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetOrder(int id)
+         #region Getting
+        [HttpGet("{orderId:int}")]
+        public async Task<IActionResult> GetOrder(int orderId)
         {
             var actorUserId = GetUserIdFromClaims();
-            var order = await _orderService.GetOrderByIdAsync(id, actorUserId);
-            if (order == null) return NotFound();
+            var order = await _orderService.GetOrderByIdAsync(orderId, actorUserId);
             return Ok(order);
         }
 
@@ -57,76 +55,66 @@ namespace ArtEva.Controllers
             var orders = await _orderService.GetOrdersForSellerAsync(sellerId);
             return Ok(orders);
         }
+        #endregion
 
-        [HttpPost]
-        public async Task<IActionResult> GetOrdersByIds([FromBody] int[] ids)
-        {
-            if (ids == null || ids.Length == 0) return BadRequest("ids required");
-            var orders = await _orderService.GetOrdersByIdsAsync(ids);
-            return Ok(orders);
-        }
 
-        // ===================== SELLER ACTIONS =====================
-        /// <summary>Seller proposes execution duration (moves SellerPending -> BuyerPending)</summary>
-        [HttpPost("{id:int}/propose")]
-        public async Task<IActionResult> ProposeExecutionBySeller(int id, [FromBody] ProposeExecutionDto dto)
+
+        #region SELLER ACTIONS
+        //// ===================== SELLER ACTIONS =====================
+        ///// <summary>Seller proposes execution duration (moves SellerPending -> BuyerPending)</summary>
+        [HttpPut("{orderId:int}")]
+        public async Task<IActionResult> ProposeExecutionBySeller(int orderId, [FromBody] ProposeExecutionDto dto)
         {
             if (dto == null) return BadRequest("ExecutionDays required");
             var sellerUserId = GetUserIdFromClaims();
-            var updated = await _orderService.ProposeExecutionBySellerAsync(id, sellerUserId, dto.ExecutionDays);
+            var updated = await _orderOrchestrator.ProposeExecutionBySellerAsync(orderId, sellerUserId, dto.ExecutionDays);
             return Ok(updated);
         }
 
-      
 
-        /// <summary>Seller marks finished and ready for buyer confirmation (CompletedBySeller)</summary>
-        [HttpPost("{id:int}/ready-for-delivery")]
-        public async Task<IActionResult> ReadyForDelivery(int id)
+
+        ///// <summary>Seller marks finished and ready for buyer confirmation (CompletedBySeller)</summary>
+        [HttpPut("{orderId:int}")]
+        public async Task<IActionResult> ReadyForDelivery(int orderId)
         {
             var sellerUserId = GetUserIdFromClaims();
-            var updated = await _orderService.MarkOrderWaitingDeliveryAsync(id, sellerUserId);
+            var updated = await _orderOrchestrator.MarkOrderWaitingDeliveryAsync(orderId, sellerUserId);
             return Ok(updated);
         }
 
-        // ===================== BUYER ACTIONS =====================
-        /// <summary>Buyer accepts or rejects proposed execution (BuyerPending -> InProgress or back to SellerPending)</summary>
-        [HttpPost("{id:int}/confirm-execution")]
-        public async Task<IActionResult> ConfirmExecutionByBuyer(int id, [FromBody] ConfirmExecutionDto dto)
+        //// ===================== BUYER ACTIONS =====================
+        ///// <summary>Buyer accepts or rejects proposed execution (BuyerPending -> InProgress or back to SellerPending)</summary>
+        [HttpPut("{orderId:int}")]
+        public async Task<IActionResult> ConfirmExecutionByBuyer(int orderId, [FromBody] ConfirmExecutionDto dto)
         {
             if (dto == null) return BadRequest("Accept flag required");
             var buyerUserId = GetUserIdFromClaims();
-            var updated = await _orderService.ConfirmExecutionByBuyerAsync(id, buyerUserId, dto.Accept);
+            var updated = await _orderService.ConfirmExecutionByBuyerAsync(orderId, buyerUserId, dto.Accept);
             return Ok(updated);
         }
 
-        /// <summary>Buyer confirms delivery (CompletedBySeller -> Delivered)</summary>
-        [HttpPost("{id:int}/confirm-delivery")]
-        public async Task<IActionResult> ConfirmDelivery(int id)
+        ///// <summary>Buyer confirms delivery (CompletedBySeller -> Delivered)</summary>
+        [HttpPut("{orderId:int}")]
+        public async Task<IActionResult> ConfirmDelivery(int orderId)
         {
             var buyerUserId = GetUserIdFromClaims();
-            var updated = await _order_service_confirm_delivery(id, buyerUserId);
+            var updated = await _orderService.ConfirmDeliveryByBuyerAsync(orderId, buyerUserId);
             return Ok(updated);
         }
 
+        #endregion
 
-        // ===================== CANCEL =====================
-        [HttpPost("{id:int}/cancel")]
-        public async Task<IActionResult> CancelOrder(int id, [FromBody] CancelOrderDto dto)
+        #region CANCEL
+        //// ===================== CANCEL =====================
+        [HttpPut("{orderId:int}")]
+        public async Task<IActionResult> CancelOrder(int orderId, [FromBody] CancelOrderDto dto)
         {
             var actorUserId = GetUserIdFromClaims();
-            await _orderService.CancelOrderAsync(id, actorUserId, dto?.Reason ?? string.Empty);
+            await _orderOrchestrator.CancelOrderAsync(orderId, actorUserId, dto?.Reason ?? string.Empty);
             return NoContent();
-        }
+        } 
+        #endregion
 
-
-        /// <summary>Seller starts work (optional) - sets InProgress when allowed</summary>
-        [HttpPost("{id:int}/start")]
-        public async Task<IActionResult> StartOrder(int id)
-        {
-            var sellerUserId = GetUserIdFromClaims();
-            var updated = await _orderService.MarkOrderInProgressAsync(id, sellerUserId);
-            return Ok(updated);
-        }
         private int GetUserIdFromClaims()
         {
             var sub = User.FindFirst("sub")?.Value;
@@ -141,14 +129,6 @@ namespace ArtEva.Controllers
             throw new InvalidOperationException("Cannot determine user id from token.");
         }
 
-        // small wrapper to call service and handle possible exceptions nicely
-        private async Task<object> _order_service_confirm_delivery(int orderId, int buyerUserId)
-        {
-            var updated = await _orderService.ConfirmDeliveryByBuyerAsync(orderId, buyerUserId);
-            return updated;
-        }
-
-
-
+     
     }
 }

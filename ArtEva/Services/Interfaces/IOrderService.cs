@@ -1,26 +1,30 @@
 ﻿// IOrderService.cs
+using ArteEva.Models;
+using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Orders;
+using ArtEva.Services.Implementation;
+using System;
 namespace ArtEva.Services.Interfaces
 {
     public interface IOrderService
     {
-        // Checkout: convert all non-converted cart items for the user into Orders (one order per CartItem)
-        Task<IEnumerable<OrderDto>> CreateOrdersFromCartAsync(int userId);
+         public Task<Order> CreateFromCartItemAsync(CreateOrderFromCartItemDto data);
 
-        // Getters
-        Task<OrderDto?> GetOrderByIdAsync(int orderId, int actorUserId);
-        Task<IEnumerable<OrderDto>> GetOrdersForSellerAsync(int sellerUserId);
-        Task<IEnumerable<OrderDto>> GetOrdersForBuyerAsync(int buyerUserId);
+        //// Getters
+        public Task<OrderDetailsDto?> GetOrderByIdAsync(int orderId, int actorUserId);
 
-        // State transitions (Seller sets schedule -> Buyer approves -> Execution -> Delivery -> Complete)
-        Task<OrderDto> ProposeExecutionBySellerAsync(int orderId, int sellerUserId, int executionDays);
-        Task<OrderDto> ConfirmExecutionByBuyerAsync(int orderId, int buyerUserId, bool accept);
-        Task<OrderDto> ConfirmDeliveryByBuyerAsync(int orderId, int buyerUserId);
-        Task CancelOrderAsync(int orderId, int actorUserId, string reason);
-        Task<OrderDto> MarkOrderWaitingDeliveryAsync(int orderId, int sellerUserId);
+        public Task<IEnumerable<DTOs.Order.OrderListSellerDto>> GetOrdersForSellerAsync(int sellerUserId);
 
-        // Helpers
-        Task<IEnumerable<OrderDto>> GetOrdersByIdsAsync(IEnumerable<int> ids);
-        Task<OrderDto> MarkOrderInProgressAsync(int orderId, int sellerUserId); // optional
+        public   Task<IEnumerable<DTOs.Order.OrderListBuyerDto>> GetOrdersForBuyerAsync(int BuyerId);
+        public Task<OrderForSellerActionDto?> GetOrderForSellerActionAsync(int orderId);
+
+        public Task<Order> ProposeExecutionAsync(Order order, int executionDays);
+        public  Task<Order> LoadOrderOrThrowAsync(int orderId);
+        public Task MarkCompletedBySeller(Order order);
+        public  Task CancelAsync(Order order);
+        public Task<OrderDto> ConfirmDeliveryByBuyerAsync(int orderId, int buyerUserId);
+        public Task<OrderDto> ConfirmExecutionByBuyerAsync(int orderId, int buyerUserId, bool accept);
+
+
     }
 }

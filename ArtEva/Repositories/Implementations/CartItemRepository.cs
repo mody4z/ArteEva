@@ -1,5 +1,6 @@
 using ArteEva.Data;
 using ArteEva.Models;
+using ArtEva.DTOs.Order;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArteEva.Repositories
@@ -8,6 +9,31 @@ namespace ArteEva.Repositories
     {
         public CartItemRepository(ApplicationDbContext context) : base(context) { }
 
+        public IQueryable<CreateOrderFromCartItemDto> GetOrderInfoForCartItem(int cartItemId)
+        {
+            return
+                GetAllAsync()
+                .Where(ci => ci.Id == cartItemId)
+                .Select(ci => new CreateOrderFromCartItemDto
+                {
+                    CartItemId = ci.Id,
+                    UserId = ci.Cart.UserId,
+
+                    ProductId = ci.ProductId,
+                    ShopId = ci.Product.ShopId,
+
+                    Quantity = ci.Quantity,
+                    UnitPrice = ci.UnitPrice,
+                    Subtotal = ci.TotalPrice,
+
+                    ProductTitle = ci.ProductName,
+                    ProductImage =  "", // ci.Product.ProductImages.Where(img=>img.IsPrimary==true).Select(img=>img.Url).FirstOrDefault(),
+                    ExecutionDays = 1,
+                    IsConvertedToOrder = ci.IsConvertedToOrder
+                });
+               
+        }
+         
         public IQueryable<CartItem> QueryByCart(int cartId)
         {
             return _context.CartItems

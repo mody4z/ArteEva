@@ -1,15 +1,20 @@
 // IOrderRepository.cs
 using ArteEva.Models;
+using ArtEva.DTOs.Order;
+using ArtEva.Services.Interfaces;
+using System;
 using System.Linq;
 
 namespace ArteEva.Repositories
 {
     public interface IOrderRepository : IRepository<Order>
     {
-        IQueryable<Order> QueryBySeller(int sellerUserId); // seller = owner of shop
-        IQueryable<Order> QueryByBuyer(int buyerUserId);
+         IQueryable<OrderDetailsDto?> GetOrderDetails(int orderId);
+         IQueryable<ArtEva.DTOs.Order.OrderListSellerDto> GetOrdersForSeller(int sellerUserId);
+         IQueryable<ArtEva.DTOs.Order.OrderListBuyerDto> GetOrdersForBuyer(int buyerUserId);
+        IQueryable<OrderForSellerActionDto> GetOrderForSellerAction(int orderId);
 
-        Task<Order?> GetByIdWithTrackingAsync(int orderId);
-        Task<IEnumerable<Order>> GetByIdsAsync(IEnumerable<int> ids);
+
+
     }
 }

@@ -1,14 +1,15 @@
 ﻿// CartItemService.cs
+using ArteEva.Models;
+using ArteEva.Repositories;
+using ArtEva.DTOs.CartDTOs;
+using ArtEva.DTOs.CartItem;
+using ArtEva.DTOs.Order;
+using ArtEva.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ArteEva.Models;
-using ArteEva.Repositories;
-using ArtEva.DTOs.CartItem;
-using ArtEva.Services.Interfaces;
-using ArtEva.DTOs.CartDTOs;
 
 namespace ArtEva.Services.Implementation
 {
@@ -24,10 +25,25 @@ namespace ArtEva.Services.Implementation
             _cartItemRepository = cartItemRepository;
             _productRepository = productRepository;
         }
+        public async Task<CreateOrderFromCartItemDto?> GetOrderInfoForCartItemAsync(int cartItemId)
+        {
+           var CreateOrder =   _cartItemRepository.GetOrderInfoForCartItem(cartItemId).FirstOrDefault();
+            return CreateOrder;
+        }
 
-        /// <summary>
-        /// جلب كل عناصر الكارت (غير محذوفة وغير محوّلة لأوردر)
-        /// </summary>
+        public async Task MarkAsConvertedAsync(int cartItemId, int orderId)
+        {
+            var cartItem = await _cartItemRepository.GetByIdAsync(cartItemId);
+
+            if (cartItem == null)
+                throw new InvalidOperationException("Cart item not found");
+
+            cartItem.IsConvertedToOrder = true;
+            cartItem.OrderId = orderId;
+
+            await _cartItemRepository.SaveChanges();
+        }
+
         public async Task<IEnumerable<CartItemDto?>> GetALlCartitemInCart(int cartId)
         {
             var items = await _cartItemRepository
@@ -37,11 +53,7 @@ namespace ArtEva.Services.Implementation
             return items.Select(MapToDto).Cast<CartItemDto?>().ToList();
         }
 
-        /// <summary>
-        /// إضافة عنصر للكارت
-        /// لو المنتج موجود بالفعل في نفس الكارت (غير محذوف وغير محوّل) — نزود الكمية
-        /// وإلا نضيف صف جديد مع snapshot (UnitPrice, ProductName, TotalPrice)
-        /// </summary>
+       
         public async Task<CartItemDto?> AddCartItem(AddCartItemDTO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
@@ -50,8 +62,7 @@ namespace ArtEva.Services.Implementation
             var product = await _productRepository.GetByIdAsync(dto.ProductID)
                 ?? throw new InvalidOperationException($"Product with ID {dto.ProductID} not found.");
 
-            // حاول نجيب العنصر الموجود لو موجود (tracked) ليتم تحديثه
-            var existing = await _cartItemRepository.GetByCartAndProductAsync(dto.CartID, dto.ProductID);
+             var existing = await _cartItemRepository.GetByCartAndProductAsync(dto.CartID, dto.ProductID);
 
             if (existing != null)
             {
@@ -61,8 +72,7 @@ namespace ArtEva.Services.Implementation
                 existing.Quantity += dto.Quantity;
                 existing.TotalPrice = existing.UnitPrice * existing.Quantity;
 
-                // Save changes (tracked entity)
-                await _cartItemRepository.SaveChanges();
+                 await _cartItemRepository.SaveChanges();
                 return MapToDto(existing);
             }
 
