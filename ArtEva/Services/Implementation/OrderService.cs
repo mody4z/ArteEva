@@ -41,101 +41,101 @@ namespace ArtEva.Services.Implementation
         }
 
 
-        // ----------------- Checkout: convert cart items to orders -----------------
-        public async Task<IEnumerable<OrderDto>> CreateOrdersFromCartAsync(int userId)
-        {
-            var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
-            if (cart == null) throw new InvalidOperationException("Cart not found");
+        //// ----------------- Checkout: convert cart items to orders -----------------
+        //public async Task<IEnumerable<OrderDto>> CreateOrdersFromCartAsync(int userId)
+        //{
+        //    var cart = await _cartRepository.GetOrCreateCartWithTrackingAsync(userId);
+        //    if (cart == null) throw new InvalidOperationException("Cart not found");
 
-            // get all not-converted items for this cart
-            var items = (await _cartItemRepository.GetNotConvertedByCartAsync(cart.Id)).ToList();
-            if (items == null || !items.Any()) return new List<OrderDto>();
+        //    // get all not-converted items for this cart
+        //    var items = (await _cartItemRepository.GetNotConvertedByCartAsync(cart.Id)).ToList();
+        //    if (items == null || !items.Any()) return new List<OrderDto>();
 
-            var createdOrders = new List<Order>();
+        //    var createdOrders = new List<Order>();
 
-            using var tx = await _dbContext.Database.BeginTransactionAsync();
-            try
-            {
-                // 1) Create Order entities for each cart item (do not assume saved Id yet)
-                foreach (var ci in items)
-                {
-                    if (ci.IsConvertedToOrder) continue; // concurrent safety
+        //    using var tx = await _dbContext.Database.BeginTransactionAsync();
+        //    try
+        //    {
+        //        // 1) Create Order entities for each cart item (do not assume saved Id yet)
+        //        foreach (var ci in items)
+        //        {
+        //            if (ci.IsConvertedToOrder) continue; // concurrent safety
 
-                    var order = new Order
-                    {
-                        UserId = cart.UserId,
-                        ShopId = (ci.Product != null && ci.Product.ShopId != 0) ? ci.Product.ShopId : ci.Id,
-                        ProductId = ci.ProductId,
-                        Quantity = ci.Quantity,
-                        UnitPriceSnapshot = ci.UnitPrice,
-                        ProductTitleSnapshot = ci.ProductName,
-                        Subtotal = ci.TotalPrice,
-                        ShippingFee = 15m,
-                        TaxTotal = 0m,
-                        GrandTotal = ci.TotalPrice + 15m,
-                        Status = OrderStatus.SellerPending,
-                        CreatedAt = DateTime.UtcNow,
-                        ConfirmedAt = null,
-                        ExecutionDays = null,
-                        CartItemId = ci.Id ,   // link back (if Order entity has this property)
-                         OrderNumber = GenerateOrderNumber()
-                    };
+        //            var order = new Order
+        //            {
+        //                UserId = cart.UserId,
+        //                ShopId = (ci.Product != null && ci.Product.ShopId != 0) ? ci.Product.ShopId : ci.Id,
+        //                ProductId = ci.ProductId,
+        //                Quantity = ci.Quantity,
+        //                UnitPriceSnapshot = ci.UnitPrice,
+        //                ProductTitleSnapshot = ci.ProductName,
+        //                Subtotal = ci.TotalPrice,
+        //                ShippingFee = 15m,
+        //                TaxTotal = 0m,
+        //                GrandTotal = ci.TotalPrice + 15m,
+        //                Status = OrderStatus.SellerPending,
+        //                CreatedAt = DateTime.UtcNow,
+        //                ConfirmedAt = null,
+        //                ExecutionDays = null,
+        //                CartItemId = ci.Id ,   // link back (if Order entity has this property)
+        //                 OrderNumber = GenerateOrderNumber()
+        //            };
 
-                    await _orderRepository.AddAsync(order);
-                    createdOrders.Add(order);
-                }
+        //            await _orderRepository.AddAsync(order);
+        //            createdOrders.Add(order);
+        //        }
 
-                // 2) persist orders (so they get IDs)
-                await _orderRepository.SaveChanges();
+        //        // 2) persist orders (so they get IDs)
+        //        await _orderRepository.SaveChanges();
 
-                // 3) mark cart items as converted and set OrderId for traceability
-                //    Pairing by CartItemId (safer than relying on ordering)
-                // Build mapping from createdOrders' CartItemId -> order
-                var orderByCartItem = createdOrders
-                    .Where(o => o.CartItemId != 0)
-                    .ToDictionary(o => o.CartItemId, o => o);
+        //        // 3) mark cart items as converted and set OrderId for traceability
+        //        //    Pairing by CartItemId (safer than relying on ordering)
+        //        // Build mapping from createdOrders' CartItemId -> order
+        //        var orderByCartItem = createdOrders
+        //            .Where(o => o.CartItemId != 0)
+        //            .ToDictionary(o => o.CartItemId, o => o);
 
-                foreach (var ci in items)
-                {
-                    if (ci.IsConvertedToOrder) continue;
+        //        foreach (var ci in items)
+        //        {
+        //            if (ci.IsConvertedToOrder) continue;
 
-                    // try to find created order for this cart item
-                    if (orderByCartItem.TryGetValue(ci.Id, out var ord))
-                    {
-                        ci.IsConvertedToOrder = true;
-                        ci.OrderId = ord.Id;
-                    }
-                    else
-                    {
-                        // fallback: if no mapping (shouldn't happen), try match by characteristics
-                        var fallback = createdOrders.FirstOrDefault(o =>
-                            o.ProductId == ci.ProductId &&
-                            o.Subtotal == ci.TotalPrice &&
-                            o.ShopId == ((ci.Product != null && ci.Product.ShopId != 0) ? ci.Product.ShopId : ci.Id) &&
-                            !o.IsDeleted);
+        //            // try to find created order for this cart item
+        //            if (orderByCartItem.TryGetValue(ci.Id, out var ord))
+        //            {
+        //                ci.IsConvertedToOrder = true;
+        //                ci.OrderId = ord.Id;
+        //            }
+        //            else
+        //            {
+        //                // fallback: if no mapping (shouldn't happen), try match by characteristics
+        //                var fallback = createdOrders.FirstOrDefault(o =>
+        //                    o.ProductId == ci.ProductId &&
+        //                    o.Subtotal == ci.TotalPrice &&
+        //                    o.ShopId == ((ci.Product != null && ci.Product.ShopId != 0) ? ci.Product.ShopId : ci.Id) &&
+        //                    !o.IsDeleted);
 
-                        if (fallback != null)
-                        {
-                            ci.IsConvertedToOrder = true;
-                            ci.OrderId = fallback.Id;
-                        }
-                    }
-                }
+        //                if (fallback != null)
+        //                {
+        //                    ci.IsConvertedToOrder = true;
+        //                    ci.OrderId = fallback.Id;
+        //                }
+        //            }
+        //        }
 
-                await _cartItemRepository.SaveChanges();
+        //        await _cartItemRepository.SaveChanges();
 
-                await tx.CommitAsync();
-            }
-            catch
-            {
-                await tx.RollbackAsync();
-                throw;
-            }
+        //        await tx.CommitAsync();
+        //    }
+        //    catch
+        //    {
+        //        await tx.RollbackAsync();
+        //        throw;
+        //    }
 
-            // map and return DTOs
-            var result = createdOrders.Select(o => MapToDto(o)).ToList();
-            return result;
-        }
+        //    // map and return DTOs
+        //    var result = createdOrders.Select(o => MapToDto(o)).ToList();
+        //    return result;
+        //}
 
         // ----------------- Getters -----------------
 
@@ -350,7 +350,10 @@ namespace ArtEva.Services.Implementation
                 CreatedAt = o.CreatedAt
             };
         }
-   
-    
+
+        public Task<IEnumerable<OrderDto>> CreateOrdersFromCartAsync(int userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

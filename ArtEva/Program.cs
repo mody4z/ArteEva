@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 using ArteEva.Repositories;
 using ArteEva.Data;
 using ArteEva.Models;
+using ArteEva.Repositories.Implementations;
 
 namespace ArtEva
 {
@@ -132,6 +133,9 @@ namespace ArtEva
             builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICartItemService, CartItemService>();
+
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
             builder.Services.AddScoped<IAddressRepository, AddressRepository>();
