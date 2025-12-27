@@ -82,7 +82,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Cart", b =>
@@ -116,7 +116,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.CartItem", b =>
@@ -178,7 +178,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("CartId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Category", b =>
@@ -219,7 +219,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Dispute", b =>
@@ -266,7 +266,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Disputes");
+                    b.ToTable("Disputes", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Favorite", b =>
@@ -302,7 +302,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("UserId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("Favorites");
+                    b.ToTable("Favorites", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Notification", b =>
@@ -339,7 +339,7 @@ namespace ArtEva.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Order", b =>
@@ -440,7 +440,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Payment", b =>
@@ -490,7 +490,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Product", b =>
@@ -562,7 +562,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("ShopId", "SKU")
                         .IsUnique();
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.ProductImage", b =>
@@ -608,7 +608,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Refund", b =>
@@ -655,7 +655,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Refunds");
+                    b.ToTable("Refunds", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Review", b =>
@@ -714,7 +714,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("ReviewerUserId", "TargetType", "TargetId")
                         .IsUnique();
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Role", b =>
@@ -848,7 +848,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("ShippingAddressId");
 
-                    b.ToTable("Shipments");
+                    b.ToTable("Shipments", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.Shop", b =>
@@ -908,7 +908,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("OwnerUserId");
 
-                    b.ToTable("Shops");
+                    b.ToTable("Shops", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.ShopFollower", b =>
@@ -944,7 +944,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("ShopId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ShopFollowers");
+                    b.ToTable("ShopFollowers", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.SubCategory", b =>
@@ -980,7 +980,7 @@ namespace ArtEva.Migrations
                     b.HasIndex("CategoryId", "Name")
                         .IsUnique();
 
-                    b.ToTable("SubCategories");
+                    b.ToTable("SubCategories", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.User", b =>
@@ -1115,7 +1115,7 @@ namespace ArtEva.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserNotifications");
+                    b.ToTable("UserNotifications", (string)null);
                 });
 
             modelBuilder.Entity("ArteEva.Models.UserRole", b =>

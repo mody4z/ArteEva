@@ -1,169 +1,192 @@
-﻿using ArteEva.Models;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ArtEva.DTOs.CartDTOs;
 using ArtEva.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ArtEva.DTOs.CartItem;
 
 namespace ArtEva.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    /// <summary>
+    /// Shopping cart API endpoints.
+    /// All endpoints require authentication.
+    /// </summary>
     [Authorize]
-/*{
-  "userName": "superadmin",
-  "password": "Admin@123*"
-}*/
+    [ApiController]
+    [Route("api/[controller]")]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
-        private readonly ILogger<CartController> _logger;
 
-        public CartController(ICartService cartService, ILogger<CartController> logger)
+        public CartController(ICartService cartService)
         {
             _cartService = cartService;
-            _logger = logger;
         }
 
-       
+        /// <summary>
+        /// Gets current user's cart with all items.
+        /// </summary>
+        /// <returns>Complete cart information</returns>
         [HttpGet]
-        public async Task<IActionResult> GetCart()
+        [ProducesResponseType(typeof(CartResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<CartResponseDto>> GetCart()
         {
             try
             {
-                var userId = GetUserId();
-                var cart = await _cartService.GetOrCreateCartAsync(userId);
+                var userId = GetCurrentUserId();
+                var cart = await _cartService.GetOrCreateUserCartAsync(userId);
                 return Ok(cart);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving the cart", error = ex.Message });
+                return BadRequest(new { error = ex.Message });
             }
         }
 
         /// <summary>
-        /// Add item to cart
-        /// </summary>
-        [HttpPost("items")]
-        public async Task<IActionResult> AddItemToCart([FromBody] AddCartItemRequest request)
-        {
-            try
-            {
-                var userId = GetUserId();
-                var cart = await _cartService.AddItemToCartAsync(userId, request);
-                return Ok(new { message = "Item added to cart successfully", cart });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while adding item to cart", error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Update cart item quantity
-        /// </summary>
-        [HttpPut("items/{productId}")]
-        public async Task<IActionResult> UpdateCartItemQuantity(int productId, [FromBody] UpdateCartItemRequest request)
-        {
-            try
-            {
-                if (request == null || request.Quantity <= 0)
-                    return BadRequest(new { message = "Invalid quantity" });
-
-                var userId = GetUserId();
-                var cart = await _cartService.UpdateCartItemQuantityAsync(userId, productId, request.Quantity);
-                return Ok(new { message = "Cart item updated successfully", cart });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while updating cart item", error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Remove item from cart
-        /// </summary>
-        [HttpDelete("items/{productId}")]
-        public async Task<IActionResult> RemoveCartItem(int productId)
-        {
-            try
-            {
-                var userId = GetUserId();
-                var cart = await _cartService.RemoveCartItemAsync(userId, productId);
-                return Ok(new { message = "Item removed from cart successfully", cart });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while removing cart item", error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Clear all items from cart
-        /// </summary>
-        [HttpDelete]
-        public async Task<IActionResult> ClearCart()
-        {
-            try
-            {
-                var userId = GetUserId();
-                await _cartService.ClearCartAsync(userId);
-                return Ok(new { message = "Cart cleared successfully" });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while clearing cart", error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Get cart summary (item count and total)
+        /// Gets cart summary (item count and total amount).
+        /// Useful for displaying in header/navigation.
         /// </summary>
         [HttpGet("summary")]
-        public async Task<IActionResult> GetCartSummary()
+        [ProducesResponseType(typeof(CartSummaryDto), StatusCodes.Status200OK)]
+        public async Task<ActionResult<CartSummaryDto>> GetCartSummary()
         {
             try
             {
-                var userId = GetUserId();
-                var summary = await _cartService.GetCartSummaryAsync(userId);
+                var userId = GetCurrentUserId();
+                var summary = await _cartService.GetUserCartSummaryAsync(userId);
                 return Ok(summary);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving cart summary", error = ex.Message });
+                return BadRequest(new { error = ex.Message });
             }
         }
 
-        private int GetUserId()
+        /// <summary>
+        /// Adds an item to cart or increments quantity if already exists.
+        /// </summary>
+        [HttpPost("items")]
+        [ProducesResponseType(typeof(CartResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CartResponseDto>> AddItem([FromBody] AddItemRequest request)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdString, out var userId))
-                throw new UnauthorizedAccessException("Invalid user ID");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var userId = GetCurrentUserId();
+                var cart = await _cartService.AddItemToUserCartAsync(
+                    userId,
+                    request.ProductId,
+                    request.Quantity);
+
+                return Ok(cart);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Updates item quantity in cart (replaces current value).
+        /// </summary>
+        [HttpPut("items")]
+        [ProducesResponseType(typeof(CartResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CartResponseDto>> UpdateItem([FromBody] UpdateItemRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var userId = GetCurrentUserId();
+                var cart = await _cartService.UpdateItemInUserCartAsync(
+                    userId,
+                    request.ProductId,
+                    request.Quantity);
+
+                return Ok(cart);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Removes an item from cart.
+        /// </summary>
+        [HttpDelete("items/{productId}")]
+        [ProducesResponseType(typeof(CartResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CartResponseDto>> RemoveItem(int productId)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var cart = await _cartService.RemoveItemFromUserCartAsync(userId, productId);
+                return Ok(cart);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Clears all items from cart.
+        /// </summary>
+        [HttpDelete("clear")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ClearCart()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                await _cartService.ClearUserCartAsync(userId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Helper to extract userId from JWT claims
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
             return userId;
         }
     }
-
-     
-
 }

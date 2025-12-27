@@ -67,7 +67,7 @@ namespace ArteEva.Data
             {
                 entity.HasOne(u => u.Cart)
                       .WithOne(c => c.User)
-                      .HasForeignKey<Cart>(c => c.UserId)
+                      .HasForeignKey<Cart>(c => c.Id)
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(u => u.Email).IsUnique();
@@ -138,6 +138,11 @@ namespace ArteEva.Data
             //Cart configurations
             modelBuilder.Entity<Cart>(entity =>
             {
+                entity.HasOne(c => c.User)
+                      .WithOne(u => u.Cart)
+                      .HasForeignKey<Cart>(c => c.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasMany(c => c.CartItems)
                       .WithOne(ci => ci.Cart)
                       .HasForeignKey(ci => ci.CartId)
