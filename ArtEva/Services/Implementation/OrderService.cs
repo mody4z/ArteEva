@@ -5,6 +5,7 @@ using ArteEva.Repositories;
 using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Orders;
 using ArtEva.Models.Enums;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,12 +17,11 @@ namespace ArtEva.Services.Implementation
 {
     public class OrderService : IOrderService
     {
-        private readonly IOrderRepository _orderRepository;
- 
+        private readonly IUnitOfWork _unitOfWork;
 
-        public OrderService(IOrderRepository orderRepository)
+        public OrderService(IUnitOfWork unitOfWork)
         {
-            _orderRepository = orderRepository;
+            _unitOfWork = unitOfWork;
         }
         #region Create Order
 
@@ -36,8 +36,8 @@ namespace ArtEva.Services.Implementation
                 pricing,
                 orderNumber);
 
-            await _orderRepository.AddAsync(order);
-            await _orderRepository.SaveChanges();
+            await _unitOfWork.OrderRepository.AddAsync(order);
+            await _unitOfWork.SaveChangesAsync();
 
             return order;
         }
@@ -50,7 +50,7 @@ namespace ArtEva.Services.Implementation
 
         public async Task<OrderForSellerActionDto?> GetOrderForSellerActionAsync(int orderId)
         {
-            return await _orderRepository.GetOrderForSellerAction(orderId).FirstOrDefaultAsync();
+            return await _unitOfWork.OrderRepository.GetOrderForSellerAction(orderId).FirstOrDefaultAsync();
 
         }
 
@@ -58,7 +58,7 @@ namespace ArtEva.Services.Implementation
           int orderId,
           int actorUserId)
         {
-            var OrderDetails = await _orderRepository.GetOrderDetails(orderId).FirstOrDefaultAsync();
+            var OrderDetails = await _unitOfWork.OrderRepository.GetOrderDetails(orderId).FirstOrDefaultAsync();
             if (OrderDetails == null)
                 throw new NotFoundException("Order Not Found");
 
@@ -74,13 +74,13 @@ namespace ArtEva.Services.Implementation
         }
         public async Task<IEnumerable<DTOs.Order.OrderListSellerDto>> GetOrdersForSellerAsync(int sellerUserId)
         {
-            var orders = await _orderRepository.GetOrdersForSeller(sellerUserId).ToListAsync();
+            var orders = await _unitOfWork.OrderRepository.GetOrdersForSeller(sellerUserId).ToListAsync();
 
             return orders;
         }
         public async Task<IEnumerable<DTOs.Order.OrderListBuyerDto>> GetOrdersForBuyerAsync(int BuyerId)
         {
-            var orders = await _orderRepository.GetOrdersForBuyer(BuyerId).ToListAsync();
+            var orders = await _unitOfWork.OrderRepository.GetOrdersForBuyer(BuyerId).ToListAsync();
 
             return orders;
         }
@@ -99,13 +99,13 @@ namespace ArtEva.Services.Implementation
 
             order.Status=OrderStatus.BuyerPending;
             order.ExecutionDays = executionDays;
-            await _orderRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return order;
         }
         public async Task<Order> LoadOrderOrThrowAsync(int orderId)
         {
-            var shop = await _orderRepository.GetByIDWithTrackingAsync(orderId);
+            var shop = await _unitOfWork.OrderRepository.GetByIDWithTrackingAsync(orderId);
 
             if (shop == null)
                 throw new NotValidException("Shop not found.");
@@ -114,7 +114,7 @@ namespace ArtEva.Services.Implementation
         } 
          public async Task<OrderDto> ConfirmExecutionByBuyerAsync(int orderId, int buyerUserId, bool accept)
          {
-             var order = await _orderRepository.GetByIDWithTrackingAsync(orderId)
+             var order = await _unitOfWork.OrderRepository.GetByIDWithTrackingAsync(orderId)
                 ?? throw new NotFoundException("Order not found");
 
             if (order.UserId != buyerUserId)
@@ -128,7 +128,7 @@ namespace ArtEva.Services.Implementation
             {
                 order.Status = OrderStatus.SellerPending; 
                 order.UpdatedAt = DateTime.UtcNow;
-                await _orderRepository.SaveChanges();
+                await _unitOfWork.SaveChangesAsync();
                 return MapToDto(order);
             }
 
@@ -136,7 +136,7 @@ namespace ArtEva.Services.Implementation
             order.ConfirmedAt = DateTime.UtcNow;
             order.UpdatedAt = DateTime.UtcNow;
 
-            await _orderRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
             return MapToDto(order);
          }
        
@@ -148,7 +148,7 @@ namespace ArtEva.Services.Implementation
 
             order.Status = OrderStatus.CompletedBySeller;
             order.UpdatedAt = DateTime.UtcNow;
-           await _orderRepository.SaveChanges();
+           await _unitOfWork.SaveChangesAsync();
 
         }
          
@@ -156,7 +156,7 @@ namespace ArtEva.Services.Implementation
         //// Buyer confirms delivery -> Delivered
         public async Task<OrderDto> ConfirmDeliveryByBuyerAsync(int orderId, int buyerUserId)
         {
-            var order = await _orderRepository.GetByIDWithTrackingAsync(orderId)
+            var order = await _unitOfWork.OrderRepository.GetByIDWithTrackingAsync(orderId)
                 ?? throw new NotFoundException("Order not found");
 
             if (order.UserId != buyerUserId)
@@ -167,7 +167,7 @@ namespace ArtEva.Services.Implementation
 
             order.Status = OrderStatus.Delivered;
             order.UpdatedAt = DateTime.UtcNow;
-            await _orderRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return MapToDto(order);
         }
@@ -183,7 +183,7 @@ namespace ArtEva.Services.Implementation
             order.CancellationReason = reason;
             order.CancelledByUserId = actorUserId;
             order.CancelledAt = DateTime.UtcNow;
-            await _orderRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         #endregion

@@ -45,7 +45,7 @@ namespace ArtEva.Services.Implementation
             cartItem.IsConvertedToOrder = true;
             cartItem.OrderId = orderId;
 
-            await _cartItemRepository.SaveChanges();
+            //await _cartItemRepository.SaveChanges();
         }
 
         //public async Task<IEnumerable<CartItemDto?>> GetALlCartitemInCart(int cartId)
@@ -112,7 +112,7 @@ namespace ArtEva.Services.Implementation
                 await _cartItemRepository.AddAsync(newItem);
             }
 
-            await _cartItemRepository.SaveChanges();
+            //await _cartItemRepository.SaveChanges();
         }
 
     
@@ -130,7 +130,7 @@ namespace ArtEva.Services.Implementation
             item.TotalPrice = item.UnitPrice * newQuantity;
             item.UpdatedAt = DateTime.UtcNow;
 
-            await _cartItemRepository.SaveChanges();
+            //await _cartItemRepository.SaveChanges();
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace ArtEva.Services.Implementation
             item.IsDeleted = true;
             item.DeletedAt = DateTime.UtcNow;
 
-            await _cartItemRepository.SaveChanges();
+            //await _cartItemRepository.SaveChanges();
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace ArtEva.Services.Implementation
                 item.DeletedAt = DateTime.UtcNow;
             }
 
-            await _cartItemRepository.SaveChanges();
+            //await _cartItemRepository.SaveChanges();
         }
 
         public async Task<List<CartItemDto>> GetCartItemsAsync(int cartId)

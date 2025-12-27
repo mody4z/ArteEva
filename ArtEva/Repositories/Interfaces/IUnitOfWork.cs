@@ -12,6 +12,7 @@ namespace ArtEva.Repositories.Interfaces
         ICartItemRepository CartItemRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         ISubCategoryRepository SubCategoryRepository { get; }
-        Task<int> SaveChagngesAsync();
+        IOrderRepository OrderRepository { get; }
+        Task<int> SaveChangesAsync();
     }
 }

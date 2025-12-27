@@ -78,10 +78,10 @@ namespace ArteEva.Repositories
             return _context.Set<T>();
         }
 
-        public async Task SaveChanges()
-        {
-            await _context.SaveChangesAsync();
-        }
+        //public async Task SaveChanges()
+        //{
+        //    await _context.SaveChangesAsync();
+        //}
 
         #region extraMethods
         public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)

@@ -18,6 +18,7 @@ namespace ArtEva.Repositories.Implementations
             AddressRepository = new AddressRepository(_context);
             CategoryRepository = new CategoryRepository(_context);
             SubCategoryRepository = new SubCategoryRepository(_context);
+            OrderRepository = new OrderRepository(_context);
         }
         private readonly ApplicationDbContext _context;
         public IShopRepository ShopRepository { get; }
@@ -28,8 +29,9 @@ namespace ArtEva.Repositories.Implementations
         public ICartItemRepository CartItemRepository { get; }
         public ICategoryRepository CategoryRepository { get; }
         public ISubCategoryRepository SubCategoryRepository { get; }
+        public IOrderRepository OrderRepository { get; }
 
-        public async Task<int> SaveChagngesAsync()
+        public async Task<int> SaveChangesAsync()
         {
            return await _context.SaveChangesAsync();
         }
