@@ -4,30 +4,27 @@ using ArtEva.Services;
 using ArtEva.DTOs.CartDTOs;
 using ArtEva.DTOs.CartItem;
 using ArtEva.Services.Interfaces;
+using ArtEva.Repositories.Interfaces;
 namespace ArtEva.Services.Implementation
 {
     public class CartService : ICartService
     {
-
-        private readonly ICartRepository _cartRepository;
-        private readonly CartDomainService _domain;
+        private readonly IUnitOfWork _unitOfWork;
+         private readonly CartDomainService _domain;
         private readonly IProductService _productService;
-        private readonly ICartItemRepository _cartItemRepository;
-        public CartService(
-        ICartRepository cartRepository,
-        CartDomainService domain,
-        IProductService productService, ICartItemRepository cartItemRepository)
+         public CartService(
+         CartDomainService domain,
+        IProductService productService, IUnitOfWork unitOfWork)
         {
-            _cartRepository = cartRepository;
-            _domain = domain;
+            _unitOfWork = unitOfWork;
+             _domain = domain;
             _productService = productService;
-            _cartItemRepository = cartItemRepository;
-        }
+         }
         public async Task<CartResponseDto> GetCartAsync(int userId)
         {
 
 
-            var cart = await _cartRepository.GetOrCreateTrackedCartAsync(userId);
+            var cart = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
 
             return Map(cart);
         }
@@ -39,7 +36,7 @@ namespace ArtEva.Services.Implementation
             if (!product.IsPublished)
                 throw new Exception("Product not available");
 
-            var cart = await _cartRepository.GetOrCreateTrackedCartAsync(userId);
+            var cart = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
 
                     var item = _domain.AddItem(
                      cart,
@@ -51,10 +48,10 @@ namespace ArtEva.Services.Implementation
 
              if (item.Id == 0)
             {
-                await _cartItemRepository.AddAsync(item);
+                await _unitOfWork.CartItemRepository.AddAsync(item);
             }
 
-            await _cartRepository.SaveAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return MapItem(item);
         }
@@ -64,9 +61,9 @@ namespace ArtEva.Services.Implementation
             if (quantity <= 0)
                 throw new Exception("Quantity must be greater than zero");
 
-            var cart = await _cartRepository.GetOrCreateTrackedCartAsync(userId);
+            var cart = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
 
-            var item = await _cartItemRepository
+            var item = await _unitOfWork.CartItemRepository
                 .GetTrackedItemByCartAndProductAsync(cart.Id, productId);
 
             if (item == null)
@@ -77,24 +74,24 @@ namespace ArtEva.Services.Implementation
             item.UpdatedAt = DateTime.UtcNow;
 
 
-           await _cartItemRepository.UpdateAsync(item);
+           await _unitOfWork.CartItemRepository.UpdateAsync(item);
 
-            await _cartRepository.SaveAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return MapItem(item);
         }
 
         public async Task<CartItemDto> RemoveItemAsync(int userId, int productId)
         {
-            var cart = await _cartRepository.GetOrCreateTrackedCartAsync(userId);
+            var cart = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
 
             var item = _domain.RemoveItem(cart, productId);
 
-            _cartItemRepository.Remove(item);
+            _unitOfWork.CartItemRepository.Remove(item);
 
-            await _cartRepository.SaveAsync();
+            await _unitOfWork.SaveChangesAsync();
 
-            var refreshed = await _cartRepository.GetOrCreateTrackedCartAsync(userId);
+            var refreshed = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
             return MapItem(item);
         }
 
