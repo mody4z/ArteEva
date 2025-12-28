@@ -31,7 +31,7 @@ namespace ArtEva.Services.Implementations
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                ImageUrl = $"uploads/category/{request.ImageUrl}",
+                ImageUrl = request.ImageUrl
 
             };
             await _unitOfWork.CategoryRepository.AddAsync(category);
@@ -64,7 +64,7 @@ namespace ArtEva.Services.Implementations
             {
                 Name = c.Name,
                 Description = c.Description,
-                ImageUrl = c.ImageUrl,
+                ImageUrl = $"uploads/categories/{c.ImageUrl}",
             }).ToList();
         }
 
@@ -80,7 +80,7 @@ namespace ArtEva.Services.Implementations
                 ID=existingCategory.Id,
                 Name = existingCategory.Name,
                 Description = existingCategory.Description,
-                ImageUrl = existingCategory.ImageUrl,
+                ImageUrl = $"uploads/categories/{existingCategory.ImageUrl}",
             };
               
         }
