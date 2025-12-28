@@ -28,6 +28,17 @@ namespace ArtEva.Services.Implementation
 
             return Map(cart);
         }
+        public async Task clear(int userId )
+        {
+            var cart = await _unitOfWork.CartRepository.GetOrCreateTrackedCartAsync(userId);
+            foreach (var item in cart.CartItems.ToList())
+            {
+                _unitOfWork.CartItemRepository.Remove(item);
+            }
+            await _unitOfWork.SaveChangesAsync();
+
+
+        }
 
         public async Task<CartItemDto> AddItemAsync(int userId, int productId, int quantity)
         {
