@@ -3,7 +3,7 @@ using ArtEva.DTOs.Order;
 
 namespace ArteEva.Repositories
 {
-   
+
     public interface ICartItemRepository : IRepository<CartItem>
     {
         IQueryable<CreateOrderFromCartItemDto> GetOrderInfoForCartItem(int cartItemId);
@@ -29,5 +29,6 @@ namespace ArteEva.Repositories
         /// Gets tracked item regardless of IsDeleted or IsConvertedToOrder status.
         /// </summary>
         Task<CartItem?> GetTrackedItemByCartAndProductIncludingDeletedAsync(int cartId, int productId);
+        public   Task SaveChanges();
     }
 }

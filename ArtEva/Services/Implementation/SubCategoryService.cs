@@ -2,6 +2,7 @@
 using ArteEva.Repositories;
 using ArtEva.DTOs.Category;
 using ArtEva.DTOs.subCategory;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Implementation;
 using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,11 @@ namespace ArtEva.Services
 {
     public class SubCategoryService : ISubCategoryService
     {
-       private readonly ISubCategoryRepository _subCategoryRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ICategoryService categoryService;
-        public SubCategoryService(ISubCategoryRepository subCategoryRepository, ICategoryService categoryService)
+        public SubCategoryService(IUnitOfWork unitOfWork, ICategoryService categoryService)
         {
-            _subCategoryRepository = subCategoryRepository;
+            _unitOfWork = unitOfWork;
             this.categoryService = categoryService;
         }
 
@@ -26,7 +27,7 @@ namespace ArtEva.Services
                 throw new NotFoundException("Category not found");
 
             }
-            var Sub =await _subCategoryRepository
+            var Sub =await _unitOfWork.SubCategoryRepository
                 .GetAllAsync()
                 .Where(sub => sub.CategoryId == CategoryId)
                 .Select(sub=> new SubCategoryDTO()
@@ -39,12 +40,12 @@ namespace ArtEva.Services
 
         public async Task<SubCategoryDTO> CreateSubCategoryAsync(CreateSubCategory req)
         {
-            var existingSubCategory = await _subCategoryRepository.FirstOrDefaultAsync(c => c.Name == req.Name); ;
+            var existingSubCategory = await _unitOfWork.SubCategoryRepository.FirstOrDefaultAsync(c => c.Name == req.Name); ;
 
             if (existingSubCategory == null) {
-                _subCategoryRepository.AddAsync(new ArteEva.Models.SubCategory { Name = req.Name, CategoryId = req.CategoryId.Value });
+                _unitOfWork.SubCategoryRepository.AddAsync(new ArteEva.Models.SubCategory { Name = req.Name, CategoryId = req.CategoryId.Value });
  
-                await _subCategoryRepository.SaveChanges();
+                await _unitOfWork.SaveChangesAsync();
                 return new SubCategoryDTO
                 {
                     Name = req.Name,
@@ -59,13 +60,13 @@ namespace ArtEva.Services
 
         public async Task DeleteSubCategoryAsync(int id)
         {
-            var existingSubCategory =  await _subCategoryRepository.GetByIdAsync(id);
+            var existingSubCategory =  await _unitOfWork.SubCategoryRepository.GetByIdAsync(id);
             if (existingSubCategory == null)
             {
                 throw new Exception("SubCategory not found");
             }
-         await _subCategoryRepository.Delete(id);
-         await _subCategoryRepository.SaveChanges();
+         await _unitOfWork.SubCategoryRepository.Delete(id);
+         await _unitOfWork.SaveChangesAsync();
 
 
 
@@ -73,7 +74,7 @@ namespace ArtEva.Services
 
         public async Task<IEnumerable<SubCategoryDTO>> GetAllSubCategoriesAsync()
         {
-            var subCategories =   _subCategoryRepository.GetAllAsync();
+            var subCategories =   _unitOfWork.SubCategoryRepository.GetAllAsync();
             return subCategories.Select(c => new SubCategoryDTO
             {
                 Name = c.Name,
@@ -82,7 +83,7 @@ namespace ArtEva.Services
 
         public async Task<SubCategoryDTO> GetSubCategoryByIdAsync(int id)
         {
-            var subCategory =await  _subCategoryRepository.GetByIdAsync(id);
+            var subCategory =await  _unitOfWork.SubCategoryRepository.GetByIdAsync(id);
             if (subCategory == null)
             {
                 throw new Exception("SubCategory not found");
@@ -97,7 +98,7 @@ namespace ArtEva.Services
         public async Task<SubCategoryDTO> UpdateSubCategoryAsync(UpdateSubcategory req)
         {          
                    
-            var existingSubCategory = await _subCategoryRepository.GetByIdAsync(req.Id);
+            var existingSubCategory = await _unitOfWork.SubCategoryRepository.GetByIdAsync(req.Id);
             if (existingSubCategory == null)
             {
                 throw new Exception("SubCategory not found");
@@ -109,8 +110,8 @@ namespace ArtEva.Services
             }
             existingSubCategory.Name = req.Name ?? existingSubCategory.Name;
             existingSubCategory.CategoryId = req.CategoryId ?? existingSubCategory.CategoryId;
-           await _subCategoryRepository.UpdateAsync(existingSubCategory);
-            await _subCategoryRepository.SaveChanges();
+           await _unitOfWork.SubCategoryRepository.UpdateAsync(existingSubCategory);
+            await _unitOfWork.SaveChangesAsync();
             return new SubCategoryDTO
             {
                 Name = existingSubCategory.Name
@@ -121,7 +122,7 @@ namespace ArtEva.Services
         //added
         public async Task<bool> ValidateSubCategoryAsync(int subCategoryId, int categoryId)
         {
-            var exists = await _subCategoryRepository.AnyAsync(sc =>
+            var exists = await _unitOfWork.SubCategoryRepository.AnyAsync(sc =>
                 sc.Id == subCategoryId &&
                 sc.CategoryId == categoryId &&
                 !sc.IsDeleted);

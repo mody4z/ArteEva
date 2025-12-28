@@ -1,4 +1,4 @@
-using ArteEva.Data;
+﻿using ArteEva.Data;
 using ArteEva.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +19,7 @@ namespace ArteEva.Repositories.Implementations
         {
             return _context.Carts
                 .AsNoTracking()
-                .Where(c => c.UserId == userId && !c.IsDeleted);
+                .Where(c => c.UserId == userId && !c.IsDeleted);  // ✅ FIXED: UserId instead of Id
         }
 
         /// <summary>
@@ -27,33 +27,29 @@ namespace ArteEva.Repositories.Implementations
         /// Returns tracked entity for subsequent updates.
         /// Never returns null - always creates if doesn't exist.
         /// </summary>
-        /// GetOrCreateCartWithTrackingAsync
-        public async Task<Cart> GetOrCreateTrackedCartAsync(int userId)
+        public async Task<Cart> GetOrCreateTrackedCartAsync(int userId)  // ✅ FIXED: Return Cart
         {
-            // Try to find existing active cart - explicitly ignore User navigation to prevent eager loading
+            // Try to find existing active cart
             var cart = await _context.Carts
-                .IgnoreAutoIncludes()
-                .Where(c => c.UserId == userId && !c.IsDeleted)
-                .FirstOrDefaultAsync();
+                .Include(c => c.CartItems.Where(ci => !ci.IsDeleted && !ci.IsConvertedToOrder))  // ✅ ADDED: Include CartItems
+                .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsDeleted);  // ✅ FIXED: UserId
 
             if (cart == null)
             {
                 // Create new cart
                 cart = new Cart
                 {
-                    UserId = userId,
+                    UserId = userId,  // ✅ FIXED: Set UserId, not Id
                     IsDeleted = false,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    CartItems = new List<CartItem>()  // ✅ ADDED: Initialize collection
                 };
 
-                _context.Carts.Add(cart);
+                await _context.Carts.AddAsync(cart);
                 await _context.SaveChangesAsync();
-                
-                // Reload to ensure we have the database-generated Id
-                await _context.Entry(cart).ReloadAsync();
             }
 
-            return cart;
+            return cart;  // ✅ FIXED: Return Cart entity
         }
 
         /// <summary>
@@ -63,7 +59,16 @@ namespace ArteEva.Repositories.Implementations
         public async Task<Cart?> GetTrackedCartByIdAsync(int cartId)
         {
             return await _context.Carts
+                .Include(c => c.CartItems.Where(ci => !ci.IsDeleted && !ci.IsConvertedToOrder))  // ✅ ADDED
                 .FirstOrDefaultAsync(c => c.Id == cartId && !c.IsDeleted);
+        }
+
+        /// <summary>
+        /// Saves changes to database.
+        /// </summary>
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

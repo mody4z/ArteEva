@@ -1,7 +1,13 @@
+using ArteEva.Data;
+using ArteEva.Models;
+using ArteEva.Repositories;
+using ArteEva.Repositories.Implementations;
 using ArtEva.Data.Data_Seeder;
+ using ArtEva.Repositories.Implementations;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services;
-using ArtEva.Services.Implementations;
 using ArtEva.Services.Implementation;
+using ArtEva.Services.Implementations;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,10 +16,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
-using ArteEva.Repositories;
-using ArteEva.Data;
-using ArteEva.Models;
-using ArteEva.Repositories.Implementations;
 
 namespace ArtEva
 {
@@ -117,43 +119,26 @@ namespace ArtEva
             // Register services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IShopService, ShopService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<CartDomainService>();
+
+            builder.Services.AddScoped<IShopService, ShopService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IShopProductService, ShopProductService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderOrchestrator, OrderOrchestrator>();
             builder.Services.AddScoped<ICartItemService, CartItemService>();
-            builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
             builder.Services.AddScoped<ICartService,CartService>();
 
+            // Register UOW 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Register repositories
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            builder.Services.AddScoped<IShopRepository, ShopRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
-            builder.Services.AddScoped<ICartService, CartService>();
-            builder.Services.AddScoped<ICartItemService, CartItemService>();
-
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-            builder.Services.AddScoped<IAddressRepository, AddressRepository>();
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-            builder.Services.AddScoped<IRefundRepository, RefundRepository>();
-            builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
-            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-            builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
-            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-            builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
-            builder.Services.AddScoped<IDisputeRepository, DisputeRepository>();
-            builder.Services.AddScoped<IShopFollowerRepository, ShopFollowerRepository>();
-            
 
  
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

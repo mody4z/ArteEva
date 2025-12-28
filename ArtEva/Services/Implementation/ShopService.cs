@@ -6,6 +6,7 @@ using ArtEva.Application.Shops.Specifications;
 using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Implementation;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -14,12 +15,11 @@ namespace ArtEva.Services.Implementations
 {
     public class ShopService : IShopService
     {
-        private readonly IShopRepository _shopRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ShopService(IShopRepository shopRepository, IConfiguration config)
+        public ShopService(IUnitOfWork unitOfWork, IConfiguration config)
         {
-            _shopRepository = shopRepository;
-
+            _unitOfWork = unitOfWork;
         }
         public async Task<ShopPagedResult<ExistShopDto>> GetShopsAsync(
                 ShopQueryCriteria criteria,
@@ -33,9 +33,9 @@ namespace ArtEva.Services.Implementations
 
             var specification = new ShopQuerySpecification(criteria);
 
-            var totalCount = await _shopRepository.CountAsync(specification);
+            var totalCount = await _unitOfWork.ShopRepository.CountAsync(specification);
 
-            var shops = await _shopRepository.GetPagedAsync(
+            var shops = await _unitOfWork.ShopRepository.GetPagedAsync(
                 specification,
                 pageNumber,
                 pageSize);
@@ -64,7 +64,7 @@ namespace ArtEva.Services.Implementations
         public async Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId)
         {
             CreatedShopDto? shop =
-              await _shopRepository.GetShopByOwnerId(userId)
+              await _unitOfWork.ShopRepository.GetShopByOwnerId(userId)
              //.Where(s=>s.Status==ShopStatus.Active || s.Status == ShopStatus.Inactive)   
              .Select(s => new CreatedShopDto
              {
@@ -83,7 +83,7 @@ namespace ArtEva.Services.Implementations
 
         public async Task CreateShopAsync(int userId, CreateShopDto dto)
         {
-            var existingShop = await _shopRepository
+            var existingShop = await _unitOfWork.ShopRepository
                 .GetShopByOwnerId(userId)
                 .FirstOrDefaultAsync();
 
@@ -103,8 +103,8 @@ namespace ArtEva.Services.Implementations
                 UpdatedAt = DateTime.UtcNow
             };
 
-            await _shopRepository.AddAsync(shop);
-            await _shopRepository.SaveChanges();
+            await _unitOfWork.ShopRepository.AddAsync(shop);
+            await _unitOfWork.SaveChangesAsync();
         }
 
 
@@ -126,7 +126,7 @@ namespace ArtEva.Services.Implementations
 
         public async Task<IEnumerable<PendingShopDto>> GetPendingShopsAsync()
         {
-            var shops = await _shopRepository.GetPendingShops()
+            var shops = await _unitOfWork.ShopRepository.GetPendingShops()
                 .ToListAsync();
             foreach (var shop in shops)
             {
@@ -149,8 +149,8 @@ namespace ArtEva.Services.Implementations
             shop.RejectionMessage = null;
             shop.UpdatedAt = DateTime.UtcNow;
 
-            await _shopRepository.UpdateAsync(shop);
-            await _shopRepository.SaveChanges();
+            await _unitOfWork.ShopRepository.UpdateAsync(shop);
+            await _unitOfWork.SaveChangesAsync();
 
             return MapToDtoApprove(shop);
         }
@@ -168,8 +168,8 @@ namespace ArtEva.Services.Implementations
             shop.RejectionMessage = dto.RejectionMessage;
             shop.UpdatedAt = DateTime.UtcNow;
 
-            await _shopRepository.UpdateAsync(shop);
-            await _shopRepository.SaveChanges();
+            await _unitOfWork.ShopRepository.UpdateAsync(shop);
+            await _unitOfWork.SaveChangesAsync();
 
             return new RejectedShopDto
             {
@@ -182,7 +182,7 @@ namespace ArtEva.Services.Implementations
         }
         public async Task<bool> ShopExistAsync(int shopId)
         {
-            var shop = _shopRepository.GetByIdAsync;
+            var shop = _unitOfWork.ShopRepository.GetByIdAsync;
             if (shop == null)
                 return false;
             else
@@ -206,12 +206,12 @@ namespace ArtEva.Services.Implementations
 
             shop.UpdatedAt = DateTime.UtcNow;
 
-            await _shopRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task UpdateShopStatusBySellerAsync(int userId, int shopId, ShopStatus newStatus)
         {
-            var shop = await _shopRepository.GetByIDWithTrackingAsync(shopId);
+            var shop = await _unitOfWork.ShopRepository.GetByIDWithTrackingAsync(shopId);
 
             if (shop == null)
                 throw new NotFoundException("Shop not found");
@@ -232,7 +232,7 @@ namespace ArtEva.Services.Implementations
             shop.Status = newStatus;
             shop.UpdatedAt = DateTime.UtcNow;
 
-            await _shopRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         #endregion
@@ -268,7 +268,7 @@ namespace ArtEva.Services.Implementations
         }
         public async Task<ShopForOrderActionDto> EnsureSellerCanManageOrdersAsync(int sellerUserId,int shopId)
         {
-            var shop = await _shopRepository
+            var shop = await _unitOfWork.ShopRepository
                 .GetAllAsync()
                 .Where(s => s.Id == shopId)
                 .Select(s => new ShopForOrderActionDto
@@ -297,7 +297,7 @@ namespace ArtEva.Services.Implementations
         #region Private Functions
         private async Task<Shop> LoadShopOrThrowAsync(int shopId)
         {
-            var shop = await _shopRepository.GetByIdAsync(shopId);
+            var shop = await _unitOfWork.ShopRepository.GetByIdAsync(shopId);
 
             if (shop == null)
                 throw new NotValidException("Shop not found.");
@@ -322,7 +322,7 @@ namespace ArtEva.Services.Implementations
         }
         private async Task<Shop> LoadShopForUpdateAsync(int shopId, int userId)
         {
-            var shop = await _shopRepository.GetByIDWithTrackingAsync(shopId);
+            var shop = await _unitOfWork.ShopRepository.GetByIDWithTrackingAsync(shopId);
 
             if (shop == null)
                 throw new NotFoundException("Shop not found");

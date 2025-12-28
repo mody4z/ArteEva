@@ -10,6 +10,7 @@ using ArtEva.DTOs.ProductImage;
 using ArtEva.DTOs.Shop;
 using ArtEva.DTOs.Shop.Products;
 using ArtEva.Models.Enums;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -22,14 +23,16 @@ namespace ArtEva.Services.Implementation
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly ISubCategoryService _subCategoryService;
-         private readonly IConfiguration _config;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _config;
 
         public ShopProductService(
             IShopService shopService,
              IProductService productService
              , IConfiguration config,
               ICategoryService categoryService,
-            ISubCategoryService subCategoryService
+            ISubCategoryService subCategoryService,
+            IUnitOfWork unitOfWork
             )
   
            
@@ -38,7 +41,8 @@ namespace ArtEva.Services.Implementation
             _productService = productService;
             _categoryService = categoryService;
             _subCategoryService = subCategoryService;
-             _config = config;
+            _unitOfWork = unitOfWork;
+            _config = config;
         }
         public async Task<CreatedShopDto> GetShopByOwnerIdAsync(int userId, int pageNumber, int pageSize)
         {
@@ -123,18 +127,24 @@ namespace ArtEva.Services.Implementation
         {
 
             await ValidateProductCreationAsync(
-                userId, dto.ShopId, dto.CategoryId, dto.SubCategoryId);
-            var product = await _productService.GetProductForUpdateAsync(dto.productId);
+             userId, dto.ShopId, dto.CategoryId, dto.SubCategoryId);
+
+            var product =
+                await _productService.GetProductForUpdateAsync(dto.productId);
+
             product.Title = dto.Title;
             product.CategoryId = dto.CategoryId;
             product.SubCategoryId = dto.SubCategoryId;
+
             await _productService.UpdateProductBaseInfoAsync(product);
+
             if (dto.Images != null)
                 await _productService.UpdateProductImagesAsync(product, dto.Images);
 
-            
-            return MapToCreatedProductDto(product);
 
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapToCreatedProductDto(product);
         }
 
         public async Task<UpdatedProductStatusDto> UpdateProductStatusAsync(int userId, int shopId, int productId, ProductStatus status)
@@ -150,6 +160,7 @@ namespace ArtEva.Services.Implementation
 
             // 3) Update status
             await _productService.UpdateProductStatusInternalAsync(product, status);
+            await _unitOfWork.SaveChangesAsync();
 
             return new UpdatedProductStatusDto
             {
@@ -170,6 +181,7 @@ namespace ArtEva.Services.Implementation
 
             // 3) Update price
             await _productService.UpdateProductPriceInternalAsync(product, newPrice);
+            await _unitOfWork.SaveChangesAsync();
 
             return new UpdatedProductPriceDto
             {
@@ -183,6 +195,7 @@ namespace ArtEva.Services.Implementation
         {
             await _shopService.EnsureShopOwnershipAsync(userId, shopId);
             await _productService.DeleteProductAsync(productId);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         #endregion

@@ -9,6 +9,7 @@ using ArtEva.DTOs.Product;
 using ArtEva.DTOs.ProductImage;
 using ArtEva.DTOs.Shop;
 using ArtEva.Models.Enums;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Implementation;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -19,26 +20,22 @@ namespace ArtEva.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
-        private readonly IProductImageRepository _productImageRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _config;
         public ProductService(
-            IProductRepository productRepository,
-            IProductImageRepository productImageRepository,
+            IUnitOfWork unitOfWork,
             IConfiguration config
             )
         {
-            _productRepository = productRepository;
-            _productImageRepository = productImageRepository;
+            _unitOfWork = unitOfWork;
             _config = config;
         }
 
         public async Task<CreatedProductDto> CreateProductAsync( CreateProductDto dto)
         {
             // Generate a unique SKU
-            string sku = await GenerateUniqueSkuAsync(dto.ShopId, dto.CategoryId);
+            var sku = await GenerateUniqueSkuAsync(dto.ShopId, dto.CategoryId);
 
-            // Build product entity
             var product = new Product
             {
                 ShopId = dto.ShopId,
@@ -51,15 +48,13 @@ namespace ArtEva.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _productRepository.AddAsync(product);
-            await _productRepository.SaveChanges();
+            await _unitOfWork.ProductRepository.AddAsync(product);
 
-            // Save product images
             if (dto.Images != null && dto.Images.Any())
             {
                 var images = dto.Images.Select(i => new ProductImage
                 {
-                    ProductId = product.Id,
+                    Product = product, // no ProductId yet, EF handles it
                     Url = i.Url,
                     AltText = i.AltText,
                     SortOrder = i.SortOrder,
@@ -67,12 +62,13 @@ namespace ArtEva.Services
                     CreatedAt = DateTime.UtcNow
                 });
 
-                await _productImageRepository.AddRangeAsync(images);
-                await _productImageRepository.SaveChanges();
+                await _unitOfWork.ProductImageRepository.AddRangeAsync(images);
             }
 
-            // Load complete product with images
-            var loadedProduct = await _productRepository.GetProductWithImagesAsync(product.Id);
+            await _unitOfWork.SaveChangesAsync(); 
+
+            var loadedProduct =
+                await _unitOfWork.ProductRepository.GetProductWithImagesAsync(product.Id);
 
             return MapToProductDto(loadedProduct);
         }
@@ -82,7 +78,7 @@ namespace ArtEva.Services
         /////////////////////////////////////////////////////////
         public async Task<CreatedProductDto> GetProductByIdAsync(int productId)
         {
-            var product = await _productRepository.GetProductWithImagesAsync(productId);
+            var product = await _unitOfWork.ProductRepository.GetProductWithImagesAsync(productId);
             if (product == null || product.IsDeleted)
                 throw new KeyNotFoundException("Product not found.");
             var existedProduct = MapToProductDto(product);
@@ -92,7 +88,7 @@ namespace ArtEva.Services
 
         public async Task<Product> GetProductForUpdateAsync(int productId)
         {
-            var product = await _productRepository.GetByIDWithTrackingAsync(productId);
+            var product = await _unitOfWork.ProductRepository.GetByIDWithTrackingAsync(productId);
 
             if (product == null || product.IsDeleted)
                 throw new NotFoundException("Product not found.");
@@ -112,12 +108,12 @@ namespace ArtEva.Services
 
             var specification = new ProductQuerySpecification(criteria);
 
-            var items = await _productRepository.GetPagedAsync(
+            var items = await _unitOfWork.ProductRepository.GetPagedAsync(
                 specification,
                 pageNumber,
                 pageSize);
 
-            var total = await _productRepository.CountAsync(specification);
+            var total = await _unitOfWork.ProductRepository.CountAsync(specification);
 
             return new PagedResult<ProductListItemDto>
             {
@@ -138,7 +134,7 @@ namespace ArtEva.Services
 
             var specification = new PublicProductQuerySpecification(criteria);
 
-            var products = await _productRepository.GetPagedAsync(
+            var products = await _unitOfWork.ProductRepository.GetPagedAsync(
                 specification,
                 pageNumber,
                 pageSize);
@@ -161,7 +157,7 @@ namespace ArtEva.Services
                     .ToList()
             }).ToList();
 
-            var totalCount = await _productRepository.CountAsync(specification);
+            var totalCount = await _unitOfWork.ProductRepository.CountAsync(specification);
 
             return new PagedResult<ProductCardDto>
             {
@@ -177,34 +173,31 @@ namespace ArtEva.Services
 
         #region Update Product
         // UPDATE PRODUCT
-        public async Task UpdateProductBaseInfoAsync(Product product)
+        public Task UpdateProductBaseInfoAsync(Product product)
         {
             product.UpdatedAt = DateTime.UtcNow;
             product.ApprovalStatus = ProductApprovalStatus.Pending;
-
-            await _productRepository.SaveChanges();
+            return Task.CompletedTask;
         }
 
-        public async Task UpdateProductStatusInternalAsync(Product product, ProductStatus status)
+        public Task UpdateProductStatusInternalAsync(Product product, ProductStatus status)
         {
             if (!Enum.IsDefined(typeof(ProductStatus), status))
                 throw new NotValidException("Invalid product status.");
 
             product.Status = status;
             product.UpdatedAt = DateTime.UtcNow;
-
-            await _productRepository.SaveChanges();
+            return Task.CompletedTask;
         }
 
-        public async Task UpdateProductPriceInternalAsync(Product product, decimal newPrice)
+        public Task UpdateProductPriceInternalAsync(Product product, decimal newPrice)
         {
             if (newPrice <= 0)
                 throw new NotValidException("Price must be greater than zero.");
 
             product.Price = newPrice;
             product.UpdatedAt = DateTime.UtcNow;
-
-            await _productRepository.SaveChanges();
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -212,30 +205,28 @@ namespace ArtEva.Services
         #region Delete Product
         public async Task DeleteProductAsync(int productId)
         {
-            var product = await _productRepository.GetByIDWithTrackingAsync(productId);
+            var product = await _unitOfWork.ProductRepository.GetByIDWithTrackingAsync(productId);
 
             if (product == null || product.IsDeleted)
                 throw new NotFoundException("Product not found.");
 
             product.IsDeleted = true;
             product.DeletedAt = DateTime.UtcNow;
-
-            await _productRepository.SaveChanges();
         }
         #endregion
         // Admin Actions
         #region Admin Actions
         public async Task<ApprovedProductDto> ApproveProductAsync(int productId)
         {
-            var product = await _productRepository.GetByIDWithTrackingAsync(productId);
+            var product = await _unitOfWork.ProductRepository.GetByIDWithTrackingAsync(productId);
 
             if (product == null)
-                throw new KeyNotFoundException($"Product with ID {productId} was not found.");
+                throw new NotFoundException($"Product not found.");
 
             product.IsPublished = true;
             product.ApprovalStatus = ProductApprovalStatus.Approved;
             
-            await _productRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
             var approved = new ApprovedProductDto
             {
                 Id = productId,
@@ -250,18 +241,18 @@ namespace ArtEva.Services
 
         public async Task<RejectedProductDto> RejectProductAsync(ProductToReject dto)
         {
-            var product = await _productRepository.GetByIDWithTrackingAsync(dto.ProductId);
+            var product = await _unitOfWork.ProductRepository.GetByIDWithTrackingAsync(dto.ProductId);
 
             if (product == null)
-                throw new KeyNotFoundException($"Product with ID {dto.ProductId} was not found.");
+                throw new NotFoundException($"Product this product not found.");
 
             product.IsPublished = false;
             product.ApprovalStatus = ProductApprovalStatus.Rejected;
             product.RejectionMessage = dto.RejectionMessage;
 
-            await _productRepository.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
-            var rejProduct = await _productRepository.GetByIdAsync(product.Id);
+            var rejProduct = await _unitOfWork.ProductRepository.GetByIdAsync(product.Id);
             var rejected = new RejectedProductDto
             {
                 Id = rejProduct.Id,
@@ -358,7 +349,7 @@ namespace ArtEva.Services
             {
                 sku = GenerateSku(shopId, categoryId);
 
-            } while (await _productRepository.AnyAsync(p =>
+            } while (await _unitOfWork.ProductRepository.AnyAsync(p =>
                 p.SKU == sku &&
                 p.ShopId == shopId &&
                 !p.IsDeleted
@@ -368,24 +359,23 @@ namespace ArtEva.Services
         }
 
         #region image helper
-        public async Task UpdateProductImagesAsync(Product product, List<UpdateProductImage> imagesDto)
+        public async Task UpdateProductImagesAsync(
+                Product product,List<UpdateProductImage> imagesDto)
         {
-            var existing = await _productImageRepository.GetImagesByProductIdWithTracking(product.Id);
-            var incoming = imagesDto;
+            var existing =
+                await _unitOfWork.ProductImageRepository
+                    .GetImagesByProductIdWithTracking(product.Id);
 
-            var existingIds = existing.Select(x => x.Id).ToList();
-            var incomingIds = incoming.Where(i => i.Id != 0).Select(i => i.Id).ToList();
-
-            // 1. DELETE removed images
+            // delete
+            var incomingIds = imagesDto.Where(i => i.Id != 0).Select(i => i.Id).ToList();
             var toDelete = existing.Where(e => !incomingIds.Contains(e.Id)).ToList();
             if (toDelete.Any())
-                _productImageRepository.RemoveRange(toDelete);
+                _unitOfWork.ProductImageRepository.RemoveRange(toDelete);
 
-            // 2. UPDATE existing images
-            foreach (var incomingImg in incoming.Where(i => i.Id != 0))
+            // update
+            foreach (var incomingImg in imagesDto.Where(i => i.Id != 0))
             {
                 var entity = existing.First(i => i.Id == incomingImg.Id);
-
                 entity.Url = incomingImg.Url;
                 entity.AltText = incomingImg.AltText;
                 entity.SortOrder = incomingImg.SortOrder;
@@ -393,8 +383,8 @@ namespace ArtEva.Services
                 entity.UpdatedAt = DateTime.UtcNow;
             }
 
-            // 3. ADD new images
-            var newImages = incoming
+            // add
+            var newImages = imagesDto
                 .Where(i => i.Id == 0)
                 .Select(i => new ProductImage
                 {
@@ -404,12 +394,9 @@ namespace ArtEva.Services
                     SortOrder = i.SortOrder,
                     IsPrimary = i.IsPrimary,
                     CreatedAt = DateTime.UtcNow
-                }).ToList();
+                });
 
-            if (newImages.Any())
-                await _productImageRepository.AddRangeAsync(newImages);
-
-            await _productImageRepository.SaveChanges();
+            await _unitOfWork.ProductImageRepository.AddRangeAsync(newImages);
         }
 
 

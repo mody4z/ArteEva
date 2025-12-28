@@ -21,7 +21,7 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await CategoryService.GetAllCategoriesAsync();
@@ -34,7 +34,7 @@ namespace ArtEva.Controllers
             return Ok(categories);
         }
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetCategoryById(int id)
         {
             var category = await CategoryService.GetCategoryByIdAsync(id);

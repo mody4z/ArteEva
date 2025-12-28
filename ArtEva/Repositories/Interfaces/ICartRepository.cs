@@ -18,5 +18,7 @@ namespace ArteEva.Repositories
         /// Gets tracked cart by ID.
         /// </summary>
         Task<Cart?> GetTrackedCartByIdAsync(int cartId);
+        Task SaveAsync();
+
     }
 }

@@ -15,8 +15,6 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-
         public async Task<IActionResult> GetallSubCategoryByCategoryId(int categoryId)
         {
           var SubCategory  =await _subCategoryService.GetallSubCategoryByCategoryIdAsync(categoryId);
@@ -25,7 +23,6 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetSubCategoryById(int id)
         {
             var subCategory = await _subCategoryService.GetSubCategoryByIdAsync(id);
@@ -37,7 +34,6 @@ namespace ArtEva.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllSubCategories()
         {
             var subCategories = await _subCategoryService.GetAllSubCategoriesAsync();

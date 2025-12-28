@@ -5,22 +5,22 @@ using ArtEva.DTOs.Category;
 using ArtEva.Services.Interfaces;
 using ArtEva.Services.Implementation;
 using Azure.Core;
+using ArtEva.Repositories.Interfaces;
 namespace ArtEva.Services.Implementations
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryService(ICategoryRepository categoryRepository , ApplicationDbContext context, IConfiguration config) 
+        public CategoryService(IUnitOfWork unitOfWork, IConfiguration config) 
         {
-            _categoryRepository = categoryRepository;
-
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryRequestDto request)
         {
 
-            var existingCategory = await _categoryRepository.FirstOrDefaultAsync(c=>c.Name==request.Name);
+            var existingCategory = await _unitOfWork.CategoryRepository.FirstOrDefaultAsync(c=>c.Name==request.Name);
             if(existingCategory != null)
             {
                 throw new Exception("Category with the same name already exists");
@@ -31,11 +31,12 @@ namespace ArtEva.Services.Implementations
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                ImageUrl = request.ImageUrl,
-
+ 
+                ImageUrl = request.ImageUrl
+ 
             };
-            await _categoryRepository.AddAsync(category);
-            await _categoryRepository.SaveChanges();
+            await _unitOfWork.CategoryRepository.AddAsync(category);
+            await _unitOfWork.SaveChangesAsync();
 
             return new CategoryDto
             {
@@ -47,31 +48,31 @@ namespace ArtEva.Services.Implementations
 
         public async Task DeleteCategoryAsync(int id)
         {
-            var existingCategory = await _categoryRepository.GetByIdAsync(id);
+            var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
             if (existingCategory == null)
             {
                 throw new Exception("Category not found");
 
             }
-            await _categoryRepository.Delete(id);
-            await _categoryRepository.SaveChanges();
+            await _unitOfWork.CategoryRepository.Delete(id);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
-            var res=   _categoryRepository.GetAllAsync();
+            var res=   _unitOfWork.CategoryRepository.GetAllAsync();
             return res.Select(c => new CategoryDto
             {
                 ID = c.Id,
                 Name = c.Name,
                 Description = c.Description,
-                ImageUrl = $"uploads/category/{c.ImageUrl}",
-            }).ToList();
+                  ImageUrl = $"uploads/categories/{c.ImageUrl}",
+             }).ToList();
         }
 
         public async Task<CategoryDto> GetCategoryByIdAsync(int id)
         {
-            var existingCategory = await _categoryRepository.GetByIdAsync(id);
+            var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
             if (existingCategory == null)
                 return null;
 
@@ -81,15 +82,16 @@ namespace ArtEva.Services.Implementations
                 ID=existingCategory.Id,
                 Name = existingCategory.Name,
                 Description = existingCategory.Description,
-                ImageUrl = $"uploads/category/{existingCategory.ImageUrl}",
-            };
+ 
+                ImageUrl = $"uploads/categories/{existingCategory.ImageUrl}",
+             };
               
         }
 
         public async Task<CategoryDto> UpdateCategoryAsync(UpdateCategoryRequestDto request)
         {
 
-            var existingCategory = await _categoryRepository.GetByIdAsync(request.Id);
+            var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
             if (existingCategory == null)
             {
                 throw new Exception("Category not found");
@@ -98,8 +100,8 @@ namespace ArtEva.Services.Implementations
             existingCategory.Description = request.Description; 
             existingCategory.ImageUrl = request.ImageUrl;
             existingCategory.UpdatedAt = DateTime.UtcNow;   
-           await _categoryRepository.UpdateAsync(existingCategory); 
-            await _categoryRepository.SaveChanges();
+           await _unitOfWork.CategoryRepository.UpdateAsync(existingCategory); 
+            await _unitOfWork.SaveChangesAsync();
             return new CategoryDto
             {
                 ID=existingCategory.Id,
@@ -112,7 +114,7 @@ namespace ArtEva.Services.Implementations
         //added
         public async Task<bool> ValidateCategoryExistsAsync(int categoryId)
         {
-            bool exists = await _categoryRepository.AnyAsync(c =>
+            bool exists = await _unitOfWork.CategoryRepository.AnyAsync(c =>
                 c.Id == categoryId && !c.IsDeleted);
             return exists;
         }
