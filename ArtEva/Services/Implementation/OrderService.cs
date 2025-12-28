@@ -2,6 +2,8 @@
 using ArteEva.Data;
 using ArteEva.Models;
 using ArteEva.Repositories;
+using ArtEva.Application.Orders.Quiries;
+using ArtEva.Application.Products.Specifications;
 using ArtEva.DTOs.Order;
 using ArtEva.DTOs.Orders;
 using ArtEva.Models.Enums;
@@ -41,11 +43,9 @@ namespace ArtEva.Services.Implementation
 
             return order;
         }
-
-       
+         
         #endregion
-
-
+         
         #region Getters
 
         public async Task<OrderForSellerActionDto?> GetOrderForSellerActionAsync(int orderId)
@@ -72,18 +72,81 @@ namespace ArtEva.Services.Implementation
             return OrderDetails;
 
         }
-        public async Task<IEnumerable<DTOs.Order.OrderListSellerDto>> GetOrdersForSellerAsync(int sellerUserId)
-        {
-            var orders = await _orderRepository.GetOrdersForSeller(sellerUserId).ToListAsync();
 
-            return orders;
-        }
-        public async Task<IEnumerable<DTOs.Order.OrderListBuyerDto>> GetOrdersForBuyerAsync(int BuyerId)
+        public async Task<OrderPagedResult<OrderListSellerDto>> GetOrdersForSellerAsync(int sellerUserId,OrderQueryCriteria criteria,int pageNumber,int pageSize)
         {
-            var orders = await _orderRepository.GetOrdersForBuyer(BuyerId).ToListAsync();
+            criteria.SellerUserId = sellerUserId;
 
-            return orders;
+            var spec = new OrderQuerySpecification(criteria);
+
+            var totalCount = await _orderRepository.CountAsync(spec);
+
+            var query = _orderRepository.GetPagedQuery(spec);
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var items = orders.Select(o => new OrderListSellerDto
+            {
+                OrderId = o.Id,
+                OrderNumber = o.OrderNumber,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt,
+                GrandTotal = o.GrandTotal,
+                ExecutionDays = o.ExecutionDays,
+                ProductTitle = o.ProductTitleSnapshot,
+                ProductImage = o.ProductImageSnapshot,
+                Quantity = o.Quantity
+            }).ToList();
+
+            return new OrderPagedResult<OrderListSellerDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
+
+
+        public async Task<OrderPagedResult<OrderListBuyerDto>> GetOrdersForBuyerAsync(
+        int buyerUserId,
+        OrderQueryCriteria criteria,
+        int pageNumber,
+        int pageSize)
+        {
+            criteria.BuyerUserId = buyerUserId;
+            var spec = new OrderQuerySpecification(criteria);
+
+            var totalCount = await _orderRepository.CountAsync(spec);
+            var query = _orderRepository.GetPagedQuery(spec);
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var items = orders.Select(o => new OrderListBuyerDto
+            {
+                OrderId = o.Id,
+                OrderNumber = o.OrderNumber,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt,
+                GrandTotal = o.GrandTotal,
+                ProductTitle = o.ProductTitleSnapshot,
+                ProductImage = o.ProductImageSnapshot,
+                Quantity = o.Quantity
+            }).ToList();
+
+            return new OrderPagedResult<OrderListBuyerDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
         #endregion
 
 

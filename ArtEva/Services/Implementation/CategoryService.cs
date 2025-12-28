@@ -31,7 +31,7 @@ namespace ArtEva.Services.Implementations
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                ImageUrl = $"uploads/category/{request.ImageUrl}",
+                ImageUrl = request.ImageUrl,
 
             };
             await _categoryRepository.AddAsync(category);
@@ -39,7 +39,6 @@ namespace ArtEva.Services.Implementations
 
             return new CategoryDto
             {
-                ID = existingCategory.Id,
                 Name = category.Name,
                 Description = category.Description,
                 ImageUrl = category.ImageUrl,
@@ -63,9 +62,10 @@ namespace ArtEva.Services.Implementations
             var res=   _categoryRepository.GetAllAsync();
             return res.Select(c => new CategoryDto
             {
+                ID = c.Id,
                 Name = c.Name,
                 Description = c.Description,
-                ImageUrl = c.ImageUrl,
+                ImageUrl = $"uploads/category/{c.ImageUrl}",
             }).ToList();
         }
 
@@ -81,7 +81,7 @@ namespace ArtEva.Services.Implementations
                 ID=existingCategory.Id,
                 Name = existingCategory.Name,
                 Description = existingCategory.Description,
-                ImageUrl = existingCategory.ImageUrl,
+                ImageUrl = $"uploads/category/{existingCategory.ImageUrl}",
             };
               
         }
@@ -102,6 +102,7 @@ namespace ArtEva.Services.Implementations
             await _categoryRepository.SaveChanges();
             return new CategoryDto
             {
+                ID=existingCategory.Id,
                 Name = existingCategory.Name,
                 Description = existingCategory.Description,
                 ImageUrl = existingCategory.ImageUrl,

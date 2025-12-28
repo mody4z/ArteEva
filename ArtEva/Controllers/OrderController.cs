@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using ArtEva.Application.Orders.Quiries;
 using ArtEva.DTOs.Order;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace ArtEva.Controllers
 {
@@ -40,21 +41,39 @@ namespace ArtEva.Controllers
             return Ok(order);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetOrdersForBuyer()
+        [HttpGet("buyer")]
+        public async Task<IActionResult> GetOrdersForBuyer(
+     [FromQuery] OrderQueryCriteria criteria,
+     [FromQuery] int pageNumber = 1,
+     [FromQuery] int pageSize = 20)
         {
             var buyerId = GetUserIdFromClaims();
-            var orders = await _orderService.GetOrdersForBuyerAsync(buyerId);
-            return Ok(orders);
-        }
 
-        [HttpGet]
-        public async Task<IActionResult> GetOrdersForSeller()
+            var result = await _orderService.GetOrdersForBuyerAsync(
+                buyerId,
+                criteria,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetOrdersForSeller(
+            [FromQuery] OrderQueryCriteria criteria,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20)
         {
             var sellerId = GetUserIdFromClaims();
-            var orders = await _orderService.GetOrdersForSellerAsync(sellerId);
-            return Ok(orders);
+
+            var result = await _orderService.GetOrdersForSellerAsync(
+                sellerId,
+                criteria,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
         }
+
         #endregion
 
 

@@ -6,13 +6,6 @@ using ArtEva.DTOs.CartItem;
 using ArtEva.DTOs.Order;
 using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using ArteEva.Models;
-using ArteEva.Repositories;
-using ArtEva.DTOs.CartDTOs;
-using ArtEva.Services.Interfaces;
-using ArtEva.Helpers;
-using ArtEva.DTOs.CartItem;
 
 namespace ArtEva.Services.Implementation
 {
