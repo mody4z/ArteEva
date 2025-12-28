@@ -6,6 +6,7 @@ namespace ArtEva.Services.Interfaces
 {
     public interface ICartService
     {
+        public Task clear(int userId);
         Task<CartResponseDto> GetCartAsync(int userId);
         Task<CartItemDto> AddItemAsync(int userId, int productId, int quantity);
         Task<CartItemDto> UpdateItemAsync(int userId, int productId, int quantity);

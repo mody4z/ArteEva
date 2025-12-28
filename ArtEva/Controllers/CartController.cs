@@ -18,6 +18,7 @@ namespace ArtEva.Controllers
         {
             _cartService = cartService;
         }
+     
 
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -34,6 +35,14 @@ namespace ArtEva.Controllers
         [HttpDelete("{productId}")]
         public async Task<IActionResult> Remove(int productId)
             => Ok(await _cartService.RemoveItemAsync(GetUserId(), productId));
+        
+        
+        [HttpDelete]
+        public async Task<IActionResult> ClearCart()
+        {
+            await _cartService.clear(GetUserId());
+            return Ok();
+        }
 
         private int GetUserId()
         {
