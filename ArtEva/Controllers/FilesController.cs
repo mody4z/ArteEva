@@ -8,7 +8,7 @@ namespace ArtEva.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Seller")]
+    [Authorize(Roles = "Seller,Admin,SuperAdmin")]
 
     public class FilesController : ControllerBase
     {

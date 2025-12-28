@@ -39,7 +39,6 @@ namespace ArtEva.Services.Implementations
 
             return new CategoryDto
             {
-                ID = existingCategory.Id,
                 Name = category.Name,
                 Description = category.Description,
                 ImageUrl = category.ImageUrl,
