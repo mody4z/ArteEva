@@ -28,7 +28,7 @@ namespace ArtEva.Controllers
         public async Task<IActionResult> Checkout(int cartItemId)
         {
             var userId = GetUserIdFromClaims();
-            var orders = await _orderOrchestrator.CreateOrderFromCartItemAsync(cartItemId, userId);
+            var orders = await _orderOrchestrator.CreateOrderFromCartItemAsync(userId,cartItemId);
             return Ok(orders);
         }
 

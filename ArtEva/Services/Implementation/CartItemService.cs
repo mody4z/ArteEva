@@ -4,6 +4,7 @@ using ArteEva.Repositories;
 using ArtEva.DTOs.CartDTOs;
 using ArtEva.DTOs.CartItem;
 using ArtEva.DTOs.Order;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,13 +15,15 @@ namespace ArtEva.Services.Implementation
     {
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IProductService _productService;
+        private readonly IUnitOfWork unitOfWork;
 
         public CartItemService(
             ICartItemRepository cartItemRepository,
-            IProductService productService)
+            IProductService productService, IUnitOfWork unitOfWork)
         {
             _cartItemRepository = cartItemRepository;
             _productService = productService;
+            this.unitOfWork = unitOfWork;
         }
         public async Task<CreateOrderFromCartItemDto?> GetOrderInfoForCartItemAsync(int cartItemId)
         {
@@ -30,15 +33,15 @@ namespace ArtEva.Services.Implementation
 
         public async Task MarkAsConvertedAsync(int cartItemId, int orderId)
         {
-            var cartItem = await _cartItemRepository.GetByIdAsync(cartItemId);
+            var cartItem = await _cartItemRepository.GetByIDWithTrackingAsync(cartItemId);
 
             if (cartItem == null)
                 throw new InvalidOperationException("Cart item not found");
 
             cartItem.IsConvertedToOrder = true;
             cartItem.OrderId = orderId;
-
-            //await _cartItemRepository.SaveChanges();
+            await unitOfWork.CartItemRepository.UpdateAsync(cartItem); 
+            await unitOfWork.SaveChangesAsync();
         }
 
         //public async Task<IEnumerable<CartItemDto?>> GetALlCartitemInCart(int cartId)
