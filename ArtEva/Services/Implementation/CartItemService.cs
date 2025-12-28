@@ -31,7 +31,7 @@ namespace ArtEva.Services.Implementation
         }
         public async Task<CreateOrderFromCartItemDto?> GetOrderInfoForCartItemAsync(int cartItemId)
         {
-           var CreateOrder =   _cartItemRepository.GetOrderInfoForCartItem(cartItemId).FirstOrDefault();
+            var CreateOrder = _cartItemRepository.GetOrderInfoForCartItem(cartItemId).FirstOrDefault();
             return CreateOrder;
         }
 
@@ -57,7 +57,7 @@ namespace ArtEva.Services.Implementation
         //    return items.Select(MapToDto).Cast<CartItemDto?>().ToList();
         //}
 
-       
+
 
         public async Task AddOrIncrementItemAsync(int cartId, int userId, int productId, int quantity)
         {
@@ -73,7 +73,7 @@ namespace ArtEva.Services.Implementation
 
             if (existingItem != null)
             {
-     
+
                 // Reactivate if it was soft-deleted or converted
                 if (existingItem.IsDeleted || existingItem.IsConvertedToOrder)
                 {
@@ -112,10 +112,10 @@ namespace ArtEva.Services.Implementation
                 await _cartItemRepository.AddAsync(newItem);
             }
 
-            //await _cartItemRepository.SaveChanges();
+            await _cartItemRepository.SaveChanges();
         }
 
-    
+
         public async Task UpdateItemQuantityAsync(int cartId, int productId, int newQuantity)
         {
             ValidateQuantity(newQuantity);
@@ -140,12 +140,12 @@ namespace ArtEva.Services.Implementation
         {
             var item = await _cartItemRepository
                 .GetTrackedItemByCartAndProductIncludingDeletedAsync(cartId, productId);
-            
+
             if (item == null)
                 throw new KeyNotFoundException($"Item with ProductId {productId} not found in cart.");
 
             ValidateItemNotConverted(item);
-            
+
             item.IsDeleted = true;
             item.DeletedAt = DateTime.UtcNow;
 
@@ -185,7 +185,7 @@ namespace ArtEva.Services.Implementation
                 .ToListAsync();
         }
 
-    
+
         public async Task<CartSummaryDto> GetCartSummaryAsync(int cartId)
         {
             var summary = await _cartItemRepository

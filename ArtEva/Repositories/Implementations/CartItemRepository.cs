@@ -28,15 +28,15 @@ namespace ArteEva.Repositories.Implementations
                     Subtotal = ci.TotalPrice,
 
                     ProductTitle = ci.ProductName,
-                    ProductImage =  "", // ci.Product.ProductImages.Where(img=>img.IsPrimary==true).Select(img=>img.Url).FirstOrDefault(),
+                    ProductImage = "", // ci.Product.ProductImages.Where(img=>img.IsPrimary==true).Select(img=>img.Url).FirstOrDefault(),
                     ExecutionDays = 1,
                     IsConvertedToOrder = ci.IsConvertedToOrder
                 });
-               
-        }
-         
 
-  
+        }
+
+
+
         public IQueryable<CartItem> GetActiveItemsInCartQuery(int cartId)
         {
             return _context.CartItems
@@ -72,6 +72,9 @@ namespace ArteEva.Repositories.Implementations
                     item.ProductId == productId &&
                     !item.IsDeleted &&
                     !item.IsConvertedToOrder);
+        }
+        public async Task SaveChanges() { 
+        await _context.SaveChangesAsync();
         }
 
         /// <summary>
