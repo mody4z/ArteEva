@@ -5,7 +5,7 @@ using ArtEva.DTOs.Order;
 
 namespace ArtEva.Services.Interfaces
 {
-  
+
     public interface ICartItemService
     {
         public Task<CreateOrderFromCartItemDto?> GetOrderInfoForCartItemAsync(int cartItemId);
@@ -13,9 +13,9 @@ namespace ArtEva.Services.Interfaces
 
         public Task<IEnumerable<CartItemDto?>> GetALlCartitemInCart(int CartID);
         public Task<CartItemDto?> AddCartItem(AddCartItemDTO addCartItemDTO);
-        public   Task<CartItemDto?> UpdateCartItem(UpdateCartitemDTO UpdateCartITemDTO);
+        public Task<CartItemDto?> UpdateCartItem(UpdateCartitemDTO UpdateCartITemDTO);
         public Task<bool> DeleteCartItem(DeleteCartItemDTO deleteCartItemDTO);
-     
+
         Task AddOrIncrementItemAsync(int cartId, int userId, int productId, int quantity);
 
         Task UpdateItemQuantityAsync(int cartId, int productId, int newQuantity);

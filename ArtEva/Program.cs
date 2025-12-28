@@ -1,7 +1,13 @@
+using ArteEva.Data;
+using ArteEva.Models;
+using ArteEva.Repositories;
+using ArteEva.Repositories.Implementations;
 using ArtEva.Data.Data_Seeder;
+ using ArtEva.Repositories.Implementations;
+using ArtEva.Repositories.Interfaces;
 using ArtEva.Services;
-using ArtEva.Services.Implementations;
 using ArtEva.Services.Implementation;
+using ArtEva.Services.Implementations;
 using ArtEva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,12 +16,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
-using ArteEva.Repositories;
-using ArteEva.Data;
-using ArteEva.Models;
-using ArteEva.Repositories.Implementations;
-using ArtEva.Repositories.Interfaces;
-using ArtEva.Repositories.Implementations;
 
 namespace ArtEva
 {
@@ -123,6 +123,8 @@ namespace ArtEva
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<CartDomainService>();
+
             builder.Services.AddScoped<IShopService, ShopService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IShopProductService, ShopProductService>();
