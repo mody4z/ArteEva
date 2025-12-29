@@ -5,6 +5,7 @@ using ArtEva.DTOs.subCategory;
 using ArtEva.Repositories.Interfaces;
 using ArtEva.Services.Implementation;
 using ArtEva.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArtEva.Services
@@ -32,7 +33,8 @@ namespace ArtEva.Services
                 .Where(sub => sub.CategoryId == CategoryId)
                 .Select(sub=> new SubCategoryDTO()
                 {
-                    Name=sub.Name,
+                    Id=sub.Id,  
+                    Name =sub.Name,
 
                 }).ToListAsync();
             return Sub;
@@ -48,6 +50,7 @@ namespace ArtEva.Services
                 await _unitOfWork.SaveChangesAsync();
                 return new SubCategoryDTO
                 {
+                    
                     Name = req.Name,
 
                 };
@@ -77,6 +80,7 @@ namespace ArtEva.Services
             var subCategories =   _unitOfWork.SubCategoryRepository.GetAllAsync();
             return subCategories.Select(c => new SubCategoryDTO
             {
+                Id= c.Id,   
                 Name = c.Name,
             }).ToList();    
         }
@@ -91,6 +95,7 @@ namespace ArtEva.Services
             }
             return new SubCategoryDTO
             {
+                Id = subCategory.Id,
                 Name = subCategory.Name,
             };
         }
@@ -114,6 +119,7 @@ namespace ArtEva.Services
             await _unitOfWork.SaveChangesAsync();
             return new SubCategoryDTO
             {
+                Id= existingSubCategory.Id, 
                 Name = existingSubCategory.Name
             };
 
