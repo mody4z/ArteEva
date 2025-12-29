@@ -42,6 +42,7 @@ namespace ArtEva.Services.Implementations
 
             var items = shops.Select(s => new ExistShopDto
             {
+                Id = s.Id,
                 OwnerUserId = s.OwnerUserId,
                 Name = s.Name,
                 ImageUrl = $"uploads/shops/{s.ImageUrl}",
